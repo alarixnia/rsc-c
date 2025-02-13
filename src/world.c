@@ -394,6 +394,7 @@ static void world_clear_region(World *world, int plane, int chunk) {
 static void world_load_section_files(World *world, int x, int y, int plane,
                                      int chunk) {
     char map_name[64];
+    char map_name_full[128];
     snprintf(map_name, sizeof(map_name), "m%d%d%d%d%d",
              plane, x / 10, x % 10, y / 10, y % 10);
     size_t map_name_length = strlen(map_name);
@@ -403,7 +404,16 @@ static void world_load_section_files(World *world, int x, int y, int plane,
     /* assume map in old file format */
     if (world->landscape_pack == NULL) {
         strcpy(map_name + map_name_length, ".jm");
-        map_data = load_data(map_name, 0, world->map_pack, &len);
+        snprintf(map_name_full, sizeof(map_name_full), "./cache/%s", map_name);
+        FILE *f = fopen(map_name_full, "rb");
+        if (f != NULL) {
+            len = 20736;
+            map_data = malloc(len);
+            fread(map_data, len, 1, f);
+            fclose(f);
+        } else {
+            map_data = load_data(map_name, 0, world->map_pack, &len);
+        }
         if (map_data != NULL) {
             world_load_section_jm(world, map_data, len, chunk);
             free(map_data);
