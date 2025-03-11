@@ -56,12 +56,37 @@ void apply_sundae(void) {
     for (int i = 0; i < game_data.npc_count; i++) {
         free(game_data.npcs[i].command);
         game_data.npcs[i].command = "";
+        if (strcmp(game_data.npcs[i].name, "Monk of Zamorak") == 0) {
+            free(game_data.npcs[i].name);
+            game_data.npcs[i].name = "Monk";
+            game_data.npcs[i].attackable = 0;
+        } else if (strcmp(game_data.npcs[i].name, "Count Draynor") == 0) {
+            game_data.npcs[i].attackable = 0;
+        }
     }
 
     for (int i = 0; i < game_data.object_count; i++) {
         if (strcmp(game_data.objects[i].command1, "rest") == 0) {
             free(game_data.objects[i].command1);
             game_data.objects[i].command1 = "WalkTo";
+        } else if (strstr(game_data.objects[i].name, "Lever") != NULL) {
+            free(game_data.objects[i].name);
+            game_data.objects[i].name = "Lever";
+            free(game_data.objects[i].command2);
+            game_data.objects[i].command2 = "Examine";
         }
+    }
+
+    for (int i = 0; i < game_data.item_count; i++) {
+        if (strcasestr(game_data.items[i].name, "Rune") == NULL &&
+	    strcasestr(game_data.items[i].name, "Runite") == NULL &&
+	    strcasestr(game_data.items[i].name, "Pizza") == NULL &&
+	    strcasestr(game_data.items[i].name, "Swordfish") == NULL) {
+            game_data.items[i].base_price = 0;
+        }
+        if (strcasestr(game_data.items[i].name, "-Rune") != NULL &&
+	    strcasestr(game_data.items[i].name, "Death-Rune") == NULL) {
+            game_data.items[i].base_price = 0;
+	}
     }
 }
