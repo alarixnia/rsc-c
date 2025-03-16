@@ -78,14 +78,14 @@ void apply_sundae(void) {
     }
 
     for (int i = 0; i < game_data.item_count; i++) {
-        if (strcasestr(game_data.items[i].name, "Rune") == NULL &&
-	    strcasestr(game_data.items[i].name, "Runite") == NULL &&
-	    strcasestr(game_data.items[i].name, "Pizza") == NULL &&
-	    strcasestr(game_data.items[i].name, "Swordfish") == NULL) {
+        if (strstr(game_data.items[i].name, "Rune ") == NULL &&
+	    strstr(game_data.items[i].name, "rune ") == NULL &&
+	    strstr(game_data.items[i].name, "Pizza") == NULL &&
+	    strstr(game_data.items[i].name, "Swordfish") == NULL) {
             game_data.items[i].base_price = 0;
         }
-        if (strcasestr(game_data.items[i].name, "-Rune") != NULL &&
-	    strcasestr(game_data.items[i].name, "Death-Rune") == NULL) {
+        if (strstr(game_data.items[i].name, "-Rune") != NULL &&
+	    strstr(game_data.items[i].name, "Death-Rune") == NULL) {
             game_data.items[i].base_price = 0;
 	}
     }
