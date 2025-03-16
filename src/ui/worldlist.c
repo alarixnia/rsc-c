@@ -41,9 +41,9 @@ static void worldlist_set_defaults(void) {
     strcpy(list[2].rsa_exponent, "00010001");
     strcpy(list[2].rsa_modulus, "86b03ac30518bdb3e508ca9660efc7738a73ee7dbedbcebf8c56d030a2bdae70503c60829b7fb5eceb529442234c21bce6d529c8da4fce870e83ceffc379e281");
 #else
-    strcpy(list[0].name, "Server_1");
+    strcpy(list[0].name, "SundaePK");
     strcpy(list[0].host, "server1.rscsundae.org");
-    list[0].port = USE_WEBSOCKS ? 43494 : 43594;
+    list[0].port = USE_WEBSOCKS ? 43495 : 43595;
     strcpy(list[0].rsa_exponent, "00010001");
     strcpy(list[0].rsa_modulus, "00b04cef8e07e0116f20afce76afee8e97572a52bf8f5f43c91e683cc33a25f7fa1634a33a0c33dae348775ddeed7e151c37689080ec0aa4f542c5fe13a64df785");
     strcpy(list[1].name, "localhost");
