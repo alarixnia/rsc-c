@@ -164,4 +164,13 @@ void mudclient_draw_status_bars(mudclient *mud) {
 
         y += 14;
     }
+
+    char formatted_pid[32] = {0};
+
+    snprintf(formatted_pid, sizeof(formatted_pid), "PID: %d",
+             mud->local_player_server_index);
+
+    surface_draw_string_right(mud->surface, formatted_pid, x, y,
+                              FONT_REGULAR_11, WHITE);
+    y += 14;
 }

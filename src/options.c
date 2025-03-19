@@ -97,7 +97,7 @@ void options_set_defaults(Options *options) {
     options->condense_item_amounts = 1;
     options->certificate_items = 0;
     options->wilderness_warning = 1;
-    options->status_bars = 0;
+    options->status_bars = 1;
     options->ground_item_models = 0;
     options->ground_item_text = 0;
     options->distant_animation = 1;

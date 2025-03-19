@@ -970,7 +970,8 @@ void mudclient_create_right_click_menu(mudclient *mud) {
                             mud->menu_items[mud->menu_items_count].target_text,
                             sizeof(mud->menu_items[mud->menu_items_count]
                                        .target_text),
-                            "@whi@%s%s", mud->players[index]->name, level_text);
+                            "@whi@%s%s @whi@(PID %d)", mud->players[index]->name, level_text,
+                            mud->players[index]->server_index);
 
                         mud->menu_items[mud->menu_items_count].type =
                             level_difference >= 0 && level_difference < 5
