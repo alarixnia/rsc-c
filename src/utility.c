@@ -42,18 +42,18 @@ void init_utility_global(void) {
 
 void get_config_path(const char *file, char *path) {
 #ifdef ANDROID
-    char *pref_path = SDL_GetPrefPath("scape2003", "mudclient");
+    char *pref_path = SDL_GetPrefPath("sundaepk", "mudclient");
     snprintf(path, PATH_MAX, "%s%s", pref_path, file);
     SDL_free(pref_path);
 #elif defined(EMSCRIPTEN)
-    snprintf(path, PATH_MAX, "/options/%s", file);
+    snprintf(path, PATH_MAX, "/sundaepk/options/%s", file);
 #elif defined(OPTIONS_UNIX)
     const char *xdg = getenv("XDG_CONFIG_HOME");
 
     if (xdg != NULL) {
-        snprintf(path, PATH_MAX, "%s/rsc-c", xdg);
+        snprintf(path, PATH_MAX, "%s/sundaepk", xdg);
         (void)mkdir(path, S_IRUSR | S_IWUSR | S_IXUSR);
-        snprintf(path, PATH_MAX, "%s/rsc-c/%s", xdg, file);
+        snprintf(path, PATH_MAX, "%s/sundaepk/%s", xdg, file);
     } else {
         const char *home = getenv("HOME");
 
@@ -61,9 +61,9 @@ void get_config_path(const char *file, char *path) {
             home = "";
         }
 
-        snprintf(path, PATH_MAX, "%s/.config/rsc-c", home);
+        snprintf(path, PATH_MAX, "%s/.config/sundaepk", home);
         (void)mkdir(path, S_IRUSR | S_IWUSR | S_IXUSR);
-        snprintf(path, PATH_MAX, "%s/.config/rsc-c/%s", home, file);
+        snprintf(path, PATH_MAX, "%s/.config/sundaepk/%s", home, file);
     }
 #else
     snprintf(path, PATH_MAX, "%s", file);
