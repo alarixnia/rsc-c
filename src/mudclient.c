@@ -974,10 +974,11 @@ int8_t *mudclient_read_data_file(mudclient *mud, char *file, char *description,
     SDL_RWops *archive_stream = SDL_RWFromFile(prefixed_file, "rb");
 #elif defined(_3DS) || defined(__SWITCH__)
     char prefixed_file[PATH_MAX];
-    snprintf(prefixed_file, "romfs:/%s", file);
+    snprintf(prefixed_file, sizeof(prefixed_file), "romfs:/%s", file);
 #else
     char prefixed_file[PATH_MAX];
     snprintf(prefixed_file, sizeof(prefixed_file), "./cache/%s", file);
+#endif
 
     /* attempt to read cache from the current working directory first */
     printf("INFO: Loading %s\n", prefixed_file);
@@ -1010,7 +1011,6 @@ int8_t *mudclient_read_data_file(mudclient *mud, char *file, char *description,
             archive_stream = fopen(prefixed_file, "rb");
         }
     }
-#endif
 
     if (archive_stream == NULL) {
         mud_error("Unable to read file: %s\n", prefixed_file);
