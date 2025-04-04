@@ -65,8 +65,8 @@ void mudclient_create_options_panel(mudclient *mud) {
     panel_new(mud->panel_game_options, mud->surface, 50);
 
     int control = mudclient_add_option_panel_checkbox(
-        mud->panel_game_options, "@whi@Members (restart): ",
-        mud->options->members, x, y);
+        mud->panel_game_options,
+        "@whi@Members (restart): ", mud->options->members, x, y);
 
     mud->game_options[control] = &mud->options->members;
     mud->game_option_types[control] = ADDITIONAL_OPTIONS_CHECKBOX;
@@ -123,8 +123,8 @@ void mudclient_create_options_panel(mudclient *mud) {
     if (mud->options->members) {
         control = mudclient_add_option_panel_checkbox(
             mud->panel_game_options,
-            "@whi@Rename Herblaw items: ", mud->options->rename_herblaw_items, x,
-            y);
+            "@whi@Rename Herblaw items: ", mud->options->rename_herblaw_items,
+            x, y);
     } else {
         control = mudclient_add_option_panel_checkbox(
             mud->panel_game_options,
@@ -194,7 +194,8 @@ void mudclient_create_options_panel(mudclient *mud) {
 
     y += OPTION_HORIZ_GAP;
 
-    sprintf(formatted_digits, "%d", mud->options->field_of_view);
+    snprintf(formatted_digits, sizeof(formatted_digits), "%d",
+             mud->options->field_of_view);
 
     control = mudclient_add_option_panel_string(
         mud->panel_game_options, "@whi@Field of view: ", formatted_digits, 3, x,
@@ -221,7 +222,8 @@ void mudclient_create_options_panel(mudclient *mud) {
 
     y += OPTION_HORIZ_GAP;
 
-    sprintf(formatted_digits, "%d", mud->options->middle_click_camera);
+    snprintf(formatted_digits, sizeof(formatted_digits), "%d",
+             mud->options->middle_click_camera);
 
     control = mudclient_add_option_panel_string(
         mud->panel_control_options,
@@ -305,7 +307,8 @@ void mudclient_create_options_panel(mudclient *mud) {
 
     y += OPTION_HORIZ_GAP;
 
-    sprintf(formatted_digits, "%d", mud->options->touch_vertical_drag);
+    snprintf(formatted_digits, sizeof(formatted_digits), "%d",
+             mud->options->touch_vertical_drag);
 
     control = mudclient_add_option_panel_string(
         mud->panel_control_options,
@@ -316,7 +319,8 @@ void mudclient_create_options_panel(mudclient *mud) {
 
     y += OPTION_HORIZ_GAP;
 
-    sprintf(formatted_digits, "%d", mud->options->touch_pinch);
+    snprintf(formatted_digits, sizeof(formatted_digits), "%d",
+             mud->options->touch_pinch);
 
     control = mudclient_add_option_panel_string(
         mud->panel_control_options,
@@ -327,7 +331,8 @@ void mudclient_create_options_panel(mudclient *mud) {
 
     y += OPTION_HORIZ_GAP;
 
-    sprintf(formatted_digits, "%d", mud->options->touch_menu_delay);
+    snprintf(formatted_digits, sizeof(formatted_digits), "%d",
+             mud->options->touch_menu_delay);
 
     control = mudclient_add_option_panel_string(
         mud->panel_control_options,
@@ -493,7 +498,8 @@ void mudclient_create_options_panel(mudclient *mud) {
 
     y += OPTION_HORIZ_GAP;
 
-    sprintf(formatted_digits, "%d", mud->options->ran_target_fps);
+    snprintf(formatted_digits, sizeof(formatted_digits), "%d",
+             mud->options->ran_target_fps);
 
     control = mudclient_add_option_panel_string(
         mud->panel_ui_options, "@whi@Text effect FPS: ", formatted_digits, 4, x,
@@ -505,8 +511,8 @@ void mudclient_create_options_panel(mudclient *mud) {
     y += OPTION_HORIZ_GAP;
 
     control = mudclient_add_option_panel_checkbox(
-        mud->panel_ui_options, "@whi@Keyboard on right: ",
-        mud->options->touch_keyboard_right, x, y);
+        mud->panel_ui_options,
+        "@whi@Keyboard on right: ", mud->options->touch_keyboard_right, x, y);
 
     mud->ui_options[control] = &mud->options->touch_keyboard_right;
     mud->ui_option_types[control] = ADDITIONAL_OPTIONS_CHECKBOX;
@@ -642,7 +648,7 @@ void mudclient_sync_options_panel(Panel *panel, void **options,
         } else if (option_types[i] == ADDITIONAL_OPTIONS_INT) {
             int option = *(int *)options[i];
             char formatted_option[12] = {0};
-            sprintf(formatted_option, "%d", option);
+            snprintf(formatted_option, sizeof(formatted_option), "%d", option);
             panel_update_text(panel, i, formatted_option);
         } else if (option_types[i] == ADDITIONAL_OPTIONS_STRING) {
             char *option = (char *)options[i];
@@ -704,7 +710,7 @@ void mudclient_draw_additional_options(mudclient *mud) {
                                  ui_y + ADDITIONAL_OPTIONS_HEIGHT - 20,
                                  ADDITIONAL_OPTIONS_WIDTH - 16, BLACK);
 
-    char formatted_reset[43] = {0};
+    char formatted_reset[64] = {0};
     char default_colour[4] = "whi";
     char vanilla_colour[4] = "whi";
 
@@ -717,8 +723,9 @@ void mudclient_draw_additional_options(mudclient *mud) {
         }
     }
 
-    sprintf(formatted_reset, "Reset to: @%s@default @whi@/ @%s@vanilla",
-            default_colour, vanilla_colour);
+    snprintf(formatted_reset, sizeof(formatted_reset),
+             "Reset to: @%s@default @whi@/ @%s@vanilla", default_colour,
+             vanilla_colour);
 
     surface_draw_string(mud->surface, formatted_reset, ui_x + 4,
                         ui_y + ADDITIONAL_OPTIONS_HEIGHT - 5, 1, WHITE);
