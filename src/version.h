@@ -9,8 +9,10 @@
 #endif
 #define VERSION_FILTER 2
 #define VERSION_MAPS 27
-#if defined(ANDROID) || defined(_3DS)
+#if defined(ANDROID)
 #define VERSION_MEDIA 59
+#elif defined(_3DS)
+#define VERSION_MEDIA 58
 #else
 #define VERSION_MEDIA 26
 #endif
