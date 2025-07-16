@@ -48,7 +48,7 @@ void options_set_defaults(Options *options) {
     options->fatigue = 0;
     options->max_quests = 17;
     options->max_skills = 16;
-    options->registration = 1;
+    options->registration = 0;
     options->idle_logout = 0;
     options->remember_username = 0;
     options->remember_password = 0;
