@@ -155,8 +155,66 @@ void mudclient_new(mudclient *mud) {
 void world_add_entities(mudclient *mud) {
     int server_index = 0;
 
-    mud->ground_item_count = 0;
+    for (int i = 0; i < mud->object_count; i++) {
+        scene_remove_model(mud->scene, mud->objects[i].model);
+
+        world_remove_object(mud->world, mud->objects[i].x, mud->objects[i].y,
+                            mud->objects[i].id);
+
+#ifdef RENDER_SW
+        game_model_destroy(mud->objects[i].model);
+#endif
+        free(mud->objects[i].model);
+        mud->objects[i].model = NULL;
+    }
+
+    for (int i = 0; i < mud->wall_object_count; i++) {
+        scene_remove_model(mud->scene, mud->wall_objects[i].model);
+
+        world_remove_wall_object(
+            mud->world, mud->wall_objects[i].x, mud->wall_objects[i].y,
+            mud->wall_objects[i].direction, mud->wall_objects[i].id);
+
+        game_model_destroy(mud->wall_objects[i].model);
+        free(mud->wall_objects[i].model);
+        mud->wall_objects[i].model = NULL;
+    }
+
     mud->object_count = 0;
+    mud->wall_object_count = 0;
+    mud->ground_item_count = 0;
+    mud->npc_count = 0;
+
+    GameCharacter *freed_characters[NPCS_SERVER_MAX] = {0};
+    size_t freed_count = 0;
+
+    for (int i = 0; i < NPCS_SERVER_MAX; i++) {
+        GameCharacter *npc = mud->npcs_server[i];
+
+        if (npc != NULL) {
+            freed_characters[freed_count++] = npc;
+            free(npc);
+            mud->npcs_server[i] = NULL;
+        }
+    }
+
+    for (int i = 0; i < NPCS_MAX; i++) {
+    label1:;
+        GameCharacter *npc = mud->npcs[i];
+
+        if (npc != NULL) {
+            for (int j = 0; j < freed_count; j++) {
+                if (freed_characters[j] == npc) {
+                    mud->npcs[i] = NULL;
+                    i++;
+                    goto label1;
+                }
+            }
+        }
+
+        free(npc);
+        mud->npcs[i] = NULL;
+    }
 
     for (int x = 0; x < 94; x++) {
         for (int y = 0; y < 94; y++) {
@@ -2637,6 +2695,7 @@ void mudclient_handle_game_input(mudclient *mud) {
         mud->local_player->current_y = ((mud->local_region_y) * MAGIC_LOC) + 64;
         mud->local_region_x = (mud->local_player->current_x - 64) / MAGIC_LOC;
         mud->local_region_y = (mud->local_player->current_y - 64) / MAGIC_LOC;
+
         world_add_entities(mud);
     }
 
