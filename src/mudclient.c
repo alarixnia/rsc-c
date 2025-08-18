@@ -2015,7 +2015,7 @@ void mudclient_update_fov(mudclient *mud) {
 
         mud->scene->view_distance =
             round((float)mud->scene->gl_height *
-                  ((float)view_distance / (float)(346 - 12)));
+                  ((float)view_distance / (float)(346)));
     } else {
         float scaled_scene_height =
             (float)(mud->scene->gl_height - 1) / 1000.0f;
@@ -2100,11 +2100,7 @@ void mudclient_start_game(mudclient *mud) {
         scene_new(mud->scene, mud->surface, 15000, 15000, 1000);
     }
 
-#ifdef RENDER_3DS_GL
     scene_set_bounds(mud->scene, mud->game_width, mud->game_height);
-#else
-    scene_set_bounds(mud->scene, mud->game_width, mud->game_height - 12);
-#endif
 
     mud->scene->clip_far_3d = 2400;
     mud->scene->clip_far_2d = 2400;
@@ -4187,7 +4183,7 @@ void mudclient_draw_game(mudclient *mud) {
     mudclient_draw_ui(mud);
 
     mud->surface->draw_string_shadow = 0;
-    mudclient_draw_chat_message_tabs(mud);
+    //mudclient_draw_chat_message_tabs(mud);
 
     if (mud->options->status_bars && mudclient_is_touch(mud)) {
         mud->surface->draw_string_shadow = 1;
@@ -4302,8 +4298,7 @@ void mudclient_sdl1_on_resize(mudclient *mud, int width, int height) {
         free(mud->scene->scanlines);
 #endif
 
-        // TODO change 12 to bar height - 1
-        scene_set_bounds(mud->scene, new_width, new_height - 12);
+        scene_set_bounds(mud->scene, new_width, new_height);
 
 #ifdef RENDER_GL
         mudclient_update_fov(mud);
@@ -4376,8 +4371,7 @@ void mudclient_on_resize(mudclient *mud) {
         }
 #endif
 
-        // TODO change 12 to bar height - 1
-        scene_set_bounds(mud->scene, new_width, new_height - 12);
+        scene_set_bounds(mud->scene, new_width, new_height);
 
 #ifdef RENDER_GL
         mudclient_update_fov(mud);
