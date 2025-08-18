@@ -4963,3 +4963,27 @@ void browser_key_pressed(int code, int char_code) {
     mudclient_key_pressed(global_mud, code, char_code);
 }
 #endif
+
+void mudclient_go_up(mudclient *mud) {
+    if (mud->plane_index < 3) {
+        mud->plane_index++;
+        mud->plane_height = 1776 - (mud->plane_index * mud->plane_multiplier);
+        mud->region_y += mud->plane_multiplier;
+    } else {
+        mud->plane_index = 0;
+        mud->plane_height = 1776 - (mud->plane_index * mud->plane_multiplier);
+        mud->region_y -= (3 * mud->plane_multiplier);
+    }
+}
+
+void mudclient_go_down(mudclient *mud) {
+    if (mud->plane_index > 0) {
+        mud->plane_index--;
+        mud->plane_height = 1776 - (mud->plane_index * mud->plane_multiplier);
+        mud->region_y -= mud->plane_multiplier;
+    } else {
+        mud->plane_index = 3;
+        mud->plane_height = 1776 - (mud->plane_index * mud->plane_multiplier);
+        mud->region_y += (3 * mud->plane_multiplier);
+    }
+}

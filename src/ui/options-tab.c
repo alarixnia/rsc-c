@@ -399,29 +399,28 @@ void mudclient_draw_ui_tab_options(mudclient *mud, int no_menus) {
 
         y += OPTIONS_LINE_BREAK;
 
-        if (sound_visible(mud) && mud->mouse_x > x &&
-            mud->mouse_x < x + OPTIONS_WIDTH && mud->mouse_y > y - 12 &&
-            mud->mouse_y < y + 4 && mud->mouse_button_click == 1) {
-            mud->settings_sound_disabled = !mud->settings_sound_disabled;
-            packet_stream_new_packet(mud->packet_stream, CLIENT_SETTINGS_GAME);
-            packet_stream_put_byte(mud->packet_stream, 3);
-
-            packet_stream_put_byte(mud->packet_stream,
-                                   mud->settings_sound_disabled ? 1 : 0);
-
-            packet_stream_send_packet(mud->packet_stream);
-        }
-
-        if (sound_visible(mud)) {
-            y += OPTIONS_LINE_BREAK;
-        }
-
         if (mud->options->show_additional_options) {
             if (mud->mouse_x > x && mud->mouse_x < x + OPTIONS_WIDTH &&
                 mud->mouse_y > y - 12 && mud->mouse_y < y + 4 &&
                 mud->mouse_button_click == 1) {
                 mud->show_additional_options = 1;
             }
+        }
+
+        y += (OPTIONS_LINE_BREAK * 2) + 3;
+
+        if (mud->mouse_x > x && mud->mouse_x < x + OPTIONS_WIDTH &&
+            mud->mouse_y > y - 12 && mud->mouse_y < y + 4 &&
+            mud->mouse_button_click == 1) {
+            mudclient_go_up(mud);
+        }
+
+        y += OPTIONS_LINE_BREAK;
+
+        if (mud->mouse_x > x && mud->mouse_x < x + OPTIONS_WIDTH &&
+            mud->mouse_y > y - 12 && mud->mouse_y < y + 4 &&
+            mud->mouse_button_click == 1) {
+            mudclient_go_down(mud);
         }
 
         mud->mouse_button_click = 0;
