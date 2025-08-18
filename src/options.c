@@ -37,7 +37,7 @@ void options_new(Options *options) {
 
 void options_set_defaults(Options *options) {
     /* server */
-    options->members = 1;
+    options->members = VERSION_MAPS > 29;
     options->version_config = VERSION_CONFIG;
     options->version_entity = VERSION_ENTITY;
     options->version_maps = VERSION_MAPS;
@@ -327,6 +327,7 @@ void options_save(Options *options) {
 void options_load(Options *options) {
     char path[PATH_MAX];
 
+#if 0
     get_config_path("options.ini", path);
 
     ini_t *options_ini = ini_load(path);
@@ -420,4 +421,5 @@ void options_load(Options *options) {
     OPTION_INI_INT("bank_maintain_slot", options->bank_maintain_slot, 0, 1);
 
     ini_free(options_ini);
+#endif
 }
