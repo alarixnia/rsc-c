@@ -65,91 +65,6 @@ void mudclient_create_options_panel(mudclient *mud) {
     panel_new(mud->panel_game_options, mud->surface, 50);
 
     int control = mudclient_add_option_panel_checkbox(
-        mud->panel_game_options,
-        "@whi@Members (restart): ", mud->options->members, x, y);
-
-    mud->game_options[control] = &mud->options->members;
-    mud->game_option_types[control] = ADDITIONAL_OPTIONS_CHECKBOX;
-
-    y += OPTION_HORIZ_GAP;
-
-    control = mudclient_add_option_panel_checkbox(
-        mud->panel_game_options,
-        "@whi@Idle logout: ", mud->options->idle_logout, x, y);
-
-    mud->game_options[control] = &mud->options->idle_logout;
-    mud->game_option_types[control] = ADDITIONAL_OPTIONS_CHECKBOX;
-
-    y += OPTION_HORIZ_GAP;
-
-    control = mudclient_add_option_panel_checkbox(
-        mud->panel_game_options,
-        "@whi@Remember username:", mud->options->remember_username, x, y);
-
-    mud->game_options[control] = &mud->options->remember_username;
-    mud->game_option_types[control] = ADDITIONAL_OPTIONS_CHECKBOX;
-
-    y += OPTION_HORIZ_GAP;
-
-    control = mudclient_add_option_panel_checkbox(
-        mud->panel_game_options,
-        "@whi@Remember password: ", mud->options->remember_password, x, y);
-
-    mud->game_options[control] = &mud->options->remember_password;
-    mud->game_option_types[control] = ADDITIONAL_OPTIONS_CHECKBOX;
-
-    y += OPTION_HORIZ_GAP;
-
-    control = mudclient_add_option_panel_checkbox(
-        mud->panel_game_options,
-        "@whi@Diversify NPCs: ", mud->options->diversify_npcs, x, y);
-
-    mud->game_options[control] = &mud->options->diversify_npcs;
-    mud->game_option_types[control] = ADDITIONAL_OPTIONS_CHECKBOX;
-
-    y += OPTION_HORIZ_GAP;
-
-    control = mudclient_add_option_panel_checkbox(
-        mud->panel_game_options,
-        "@whi@3D ground items: ", mud->options->ground_item_models, x, y);
-
-    mud->game_options[control] = &mud->options->ground_item_models;
-    mud->game_option_types[control] = ADDITIONAL_OPTIONS_CHECKBOX;
-
-    y += OPTION_HORIZ_GAP;
-
-    if (mud->options->members) {
-        control = mudclient_add_option_panel_checkbox(
-            mud->panel_game_options,
-            "@whi@Rename Herblaw items: ", mud->options->rename_herblaw_items,
-            x, y);
-    } else {
-        control = mudclient_add_option_panel_checkbox(
-            mud->panel_game_options,
-            "@whi@Show potion dosage: ", mud->options->rename_herblaw_items, x,
-            y);
-    }
-
-    mud->game_options[control] = &mud->options->rename_herblaw_items;
-    mud->game_option_types[control] = ADDITIONAL_OPTIONS_CHECKBOX;
-
-    x += (ADDITIONAL_OPTIONS_WIDTH - 4) / 2;
-    y = ui_y + OPTION_HORIZ_GAP + ADDITIONAL_OPTIONS_TAB_HEIGHT + 4;
-
-#ifndef RENDER_GL
-    if (mud->options->version_entity > 8) {
-        control = mudclient_add_option_panel_checkbox(
-            mud->panel_game_options,
-            "@whi@HQ sprites (restart): ", mud->options->tga_sprites, x, y);
-
-        mud->game_options[control] = &mud->options->tga_sprites;
-        mud->game_option_types[control] = ADDITIONAL_OPTIONS_CHECKBOX;
-
-        y += OPTION_HORIZ_GAP;
-    }
-#endif
-
-    control = mudclient_add_option_panel_checkbox(
         mud->panel_game_options, "@whi@Show roofs: ", mud->options->show_roofs,
         x, y);
 
@@ -169,15 +84,6 @@ void mudclient_create_options_panel(mudclient *mud) {
 
     control = mudclient_add_option_panel_checkbox(
         mud->panel_game_options,
-        "@whi@Low memory (restart): ", mud->options->lowmem, x, y);
-
-    mud->game_options[control] = &mud->options->lowmem;
-    mud->game_option_types[control] = ADDITIONAL_OPTIONS_CHECKBOX;
-
-    y += OPTION_HORIZ_GAP;
-
-    control = mudclient_add_option_panel_checkbox(
-        mud->panel_game_options,
         "@whi@Underground flicker: ", mud->options->flicker, x, y);
 
     mud->game_options[control] = &mud->options->flicker;
@@ -191,18 +97,6 @@ void mudclient_create_options_panel(mudclient *mud) {
 
     mud->game_options[control] = &mud->options->fog_of_war;
     mud->game_option_types[control] = ADDITIONAL_OPTIONS_CHECKBOX;
-
-    y += OPTION_HORIZ_GAP;
-
-    snprintf(formatted_digits, sizeof(formatted_digits), "%d",
-             mud->options->field_of_view);
-
-    control = mudclient_add_option_panel_string(
-        mud->panel_game_options, "@whi@Field of view: ", formatted_digits, 3, x,
-        y);
-
-    mud->game_options[control] = &mud->options->field_of_view;
-    mud->game_option_types[control] = ADDITIONAL_OPTIONS_INT;
 
     y += OPTION_HORIZ_GAP;
 
@@ -245,64 +139,9 @@ void mudclient_create_options_panel(mudclient *mud) {
 
     control = mudclient_add_option_panel_checkbox(
         mud->panel_control_options,
-        "@whi@Tab message respond: ", mud->options->tab_respond, x, y);
-
-    mud->control_options[control] = &mud->options->tab_respond;
-    mud->control_option_types[control] = ADDITIONAL_OPTIONS_CHECKBOX;
-
-    y += OPTION_HORIZ_GAP;
-
-    control = mudclient_add_option_panel_checkbox(
-        mud->panel_control_options,
-        "@whi@Option number keys: ", mud->options->option_numbers, x, y);
-
-    mud->control_options[control] = &mud->options->option_numbers;
-    mud->control_option_types[control] = ADDITIONAL_OPTIONS_CHECKBOX;
-
-    y += OPTION_HORIZ_GAP;
-
-    control = mudclient_add_option_panel_checkbox(
-        mud->panel_control_options,
         "@whi@Compass menu: ", mud->options->compass_menu, x, y);
 
     mud->control_options[control] = &mud->options->compass_menu;
-    mud->control_option_types[control] = ADDITIONAL_OPTIONS_CHECKBOX;
-
-    y += OPTION_HORIZ_GAP;
-
-    control = mudclient_add_option_panel_checkbox(
-        mud->panel_control_options,
-        "@whi@Transaction menus: ", mud->options->transaction_menus, x, y);
-
-    mud->control_options[control] = &mud->options->transaction_menus;
-    mud->control_option_types[control] = ADDITIONAL_OPTIONS_CHECKBOX;
-
-    y += OPTION_HORIZ_GAP;
-
-    control = mudclient_add_option_panel_checkbox(
-        mud->panel_control_options, "@whi@Offer-X: ", mud->options->offer_x, x,
-        y);
-
-    mud->control_options[control] = &mud->options->offer_x;
-    mud->control_option_types[control] = ADDITIONAL_OPTIONS_CHECKBOX;
-
-    y += OPTION_HORIZ_GAP;
-
-    control = mudclient_add_option_panel_checkbox(
-        mud->panel_control_options,
-        "@whi@Last Offer-X: ", mud->options->last_offer_x, x, y);
-
-    mud->control_options[control] = &mud->options->last_offer_x;
-    mud->control_option_types[control] = ADDITIONAL_OPTIONS_CHECKBOX;
-
-    x += (ADDITIONAL_OPTIONS_WIDTH - 4) / 2;
-    y = ui_y + OPTION_HORIZ_GAP + ADDITIONAL_OPTIONS_TAB_HEIGHT + 4;
-
-    control = mudclient_add_option_panel_checkbox(
-        mud->panel_control_options,
-        "@whi@Hold to buy/sell in shop: ", mud->options->hold_to_buy, x, y);
-
-    mud->control_options[control] = &mud->options->hold_to_buy;
     mud->control_option_types[control] = ADDITIONAL_OPTIONS_CHECKBOX;
 
     y += OPTION_HORIZ_GAP;
@@ -366,105 +205,10 @@ void mudclient_create_options_panel(mudclient *mud) {
     y += OPTION_HORIZ_GAP;
 
     control = mudclient_add_option_panel_checkbox(
-        mud->panel_ui_options, "@whi@Anti-alias: ", mud->options->anti_alias, x,
-        y);
-
-    mud->ui_options[control] = &mud->options->anti_alias;
-    mud->ui_option_types[control] = ADDITIONAL_OPTIONS_CHECKBOX;
-
-    y += OPTION_HORIZ_GAP;
-
-    control = mudclient_add_option_panel_checkbox(
-        mud->panel_ui_options,
-        "@whi@Number commas: ", mud->options->number_commas, x, y);
-
-    mud->ui_options[control] = &mud->options->number_commas;
-    mud->ui_option_types[control] = ADDITIONAL_OPTIONS_CHECKBOX;
-
-    y += OPTION_HORIZ_GAP;
-
-    control = mudclient_add_option_panel_checkbox(
-        mud->panel_ui_options,
-        "@whi@Remaining XP: ", mud->options->remaining_experience, x, y);
-
-    mud->ui_options[control] = &mud->options->remaining_experience;
-    mud->ui_option_types[control] = ADDITIONAL_OPTIONS_CHECKBOX;
-
-    y += OPTION_HORIZ_GAP;
-
-    control = mudclient_add_option_panel_checkbox(
-        mud->panel_ui_options,
-        "@whi@Total XP: ", mud->options->total_experience, x, y);
-
-    mud->ui_options[control] = &mud->options->total_experience;
-    mud->ui_option_types[control] = ADDITIONAL_OPTIONS_CHECKBOX;
-
-    y += OPTION_HORIZ_GAP;
-
-    control = mudclient_add_option_panel_checkbox(
-        mud->panel_ui_options,
-        "@whi@XP drops: ", mud->options->experience_drops, x, y);
-
-    mud->ui_options[control] = &mud->options->experience_drops;
-    mud->ui_option_types[control] = ADDITIONAL_OPTIONS_CHECKBOX;
-
-    y += OPTION_HORIZ_GAP;
-
-    control = mudclient_add_option_panel_checkbox(
-        mud->panel_ui_options,
-        "@whi@Inventory count: ", mud->options->inventory_count, x, y);
-
-    mud->ui_options[control] = &mud->options->inventory_count;
-    mud->ui_option_types[control] = ADDITIONAL_OPTIONS_CHECKBOX;
-
-    y += OPTION_HORIZ_GAP;
-
-    control = mudclient_add_option_panel_checkbox(
-        mud->panel_ui_options,
-        "@whi@K/M amounts: ", mud->options->condense_item_amounts, x, y);
-
-    mud->ui_options[control] = &mud->options->condense_item_amounts;
-    mud->ui_option_types[control] = ADDITIONAL_OPTIONS_CHECKBOX;
-
-    y += OPTION_HORIZ_GAP;
-
-    x += (ADDITIONAL_OPTIONS_WIDTH - 4) / 2;
-    y = ui_y + OPTION_HORIZ_GAP + ADDITIONAL_OPTIONS_TAB_HEIGHT + 4;
-
-    control = mudclient_add_option_panel_checkbox(
         mud->panel_ui_options,
         "@whi@Wilderness warning: ", mud->options->wilderness_warning, x, y);
 
     mud->ui_options[control] = &mud->options->wilderness_warning;
-    mud->ui_option_types[control] = ADDITIONAL_OPTIONS_CHECKBOX;
-
-    y += OPTION_HORIZ_GAP;
-
-    if (mud->options->version_media >= 59) {
-        control = mudclient_add_option_panel_checkbox(
-            mud->panel_ui_options,
-            "@whi@Certificate items: ", mud->options->certificate_items, x, y);
-
-        mud->ui_options[control] = &mud->options->certificate_items;
-        mud->ui_option_types[control] = ADDITIONAL_OPTIONS_CHECKBOX;
-
-        y += OPTION_HORIZ_GAP;
-    }
-
-    control = mudclient_add_option_panel_checkbox(
-        mud->panel_ui_options, "@whi@Status bars: ", mud->options->status_bars,
-        x, y);
-
-    mud->ui_options[control] = &mud->options->status_bars;
-    mud->ui_option_types[control] = ADDITIONAL_OPTIONS_CHECKBOX;
-
-    y += OPTION_HORIZ_GAP;
-
-    control = mudclient_add_option_panel_checkbox(
-        mud->panel_ui_options,
-        "@whi@Ground item highlight: ", mud->options->ground_item_text, x, y);
-
-    mud->ui_options[control] = &mud->options->ground_item_text;
     mud->ui_option_types[control] = ADDITIONAL_OPTIONS_CHECKBOX;
 
     y += OPTION_HORIZ_GAP;
@@ -489,15 +233,6 @@ void mudclient_create_options_panel(mudclient *mud) {
         y += OPTION_HORIZ_GAP;
     }
 
-    control = mudclient_add_option_panel_checkbox(
-        mud->panel_ui_options,
-        "@whi@Style outside combat: ", mud->options->combat_style_always, x, y);
-
-    mud->ui_options[control] = &mud->options->combat_style_always;
-    mud->ui_option_types[control] = ADDITIONAL_OPTIONS_CHECKBOX;
-
-    y += OPTION_HORIZ_GAP;
-
     snprintf(formatted_digits, sizeof(formatted_digits), "%d",
              mud->options->ran_target_fps);
 
@@ -517,93 +252,8 @@ void mudclient_create_options_panel(mudclient *mud) {
     mud->ui_options[control] = &mud->options->touch_keyboard_right;
     mud->ui_option_types[control] = ADDITIONAL_OPTIONS_CHECKBOX;
 
-    /* bank */
-    x = ui_x + 4;
-    y = ui_y + OPTION_HORIZ_GAP + ADDITIONAL_OPTIONS_TAB_HEIGHT + 4;
-
     mud->panel_bank_options = malloc(sizeof(Panel));
     panel_new(mud->panel_bank_options, mud->surface, 50);
-
-    control = mudclient_add_option_panel_checkbox(
-        mud->panel_bank_options,
-        "@whi@Always multi-withdraw: ", mud->options->bank_unstackble_withdraw,
-        x, y);
-
-    mud->bank_options[control] = &mud->options->bank_unstackble_withdraw;
-    mud->bank_option_types[control] = ADDITIONAL_OPTIONS_CHECKBOX;
-
-    y += OPTION_HORIZ_GAP;
-
-    control = mudclient_add_option_panel_checkbox(
-        mud->panel_bank_options,
-        "@whi@Search items: ", mud->options->bank_search, x, y);
-
-    mud->bank_options[control] = &mud->options->bank_search;
-    mud->bank_option_types[control] = ADDITIONAL_OPTIONS_CHECKBOX;
-
-    y += OPTION_HORIZ_GAP;
-
-    control = mudclient_add_option_panel_checkbox(
-        mud->panel_bank_options,
-        "@whi@Show capacity: ", mud->options->bank_capacity, x, y);
-
-    mud->bank_options[control] = &mud->options->bank_capacity;
-    mud->bank_option_types[control] = ADDITIONAL_OPTIONS_CHECKBOX;
-
-    y += OPTION_HORIZ_GAP;
-
-    control = mudclient_add_option_panel_checkbox(
-        mud->panel_bank_options,
-        "@whi@Show total value: ", mud->options->bank_value, x, y);
-
-    mud->bank_options[control] = &mud->options->bank_value;
-    mud->bank_option_types[control] = ADDITIONAL_OPTIONS_CHECKBOX;
-
-    y += OPTION_HORIZ_GAP;
-
-    control = mudclient_add_option_panel_checkbox(
-        mud->panel_bank_options,
-        "@whi@Bank expand: ", mud->options->bank_expand, x, y);
-
-    mud->bank_options[control] = &mud->options->bank_expand;
-    mud->bank_option_types[control] = ADDITIONAL_OPTIONS_CHECKBOX;
-
-    y += OPTION_HORIZ_GAP;
-
-    control = mudclient_add_option_panel_checkbox(
-        mud->panel_bank_options,
-        "@whi@Bank scrollbar: ", mud->options->bank_scroll, x, y);
-
-    mud->bank_options[control] = &mud->options->bank_scroll;
-    mud->bank_option_types[control] = ADDITIONAL_OPTIONS_CHECKBOX;
-
-    y += OPTION_HORIZ_GAP;
-
-    control = mudclient_add_option_panel_checkbox(
-        mud->panel_bank_options, "@whi@Bank menus: ", mud->options->bank_menus,
-        x, y);
-
-    mud->bank_options[control] = &mud->options->bank_menus;
-    mud->bank_option_types[control] = ADDITIONAL_OPTIONS_CHECKBOX;
-
-    y += OPTION_HORIZ_GAP;
-
-    control = mudclient_add_option_panel_checkbox(
-        mud->panel_bank_options,
-        "@whi@Show inventory: ", mud->options->bank_inventory, x, y);
-
-    mud->bank_options[control] = &mud->options->bank_inventory;
-    mud->bank_option_types[control] = ADDITIONAL_OPTIONS_CHECKBOX;
-
-    x += (ADDITIONAL_OPTIONS_WIDTH - 4) / 2;
-    y = ui_y + OPTION_HORIZ_GAP + ADDITIONAL_OPTIONS_TAB_HEIGHT + 4;
-
-    control = mudclient_add_option_panel_checkbox(
-        mud->panel_bank_options,
-        "@whi@Maintain slot: ", mud->options->bank_maintain_slot, x, y);
-
-    mud->bank_options[control] = &mud->options->bank_maintain_slot;
-    mud->bank_option_types[control] = ADDITIONAL_OPTIONS_CHECKBOX;
 }
 
 Panel *mudclient_get_active_option_panel(mudclient *mud) {
