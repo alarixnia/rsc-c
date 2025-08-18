@@ -493,6 +493,21 @@ void mudclient_key_pressed(mudclient *mud, int code, int char_code) {
             }
         }
 
+	switch (char_code) {
+	    case 'w':
+		mud->local_player->current_y -= 25;
+		return;
+	    case 's':
+		mud->local_player->current_y += 25;
+		return;
+	    case 'a':
+		mud->local_player->current_x += 25;
+		return;
+	    case 'd':
+		mud->local_player->current_x -= 25;
+		return;
+	}
+
         mudclient_handle_key_press(mud, char_code);
     }
 
@@ -2800,6 +2815,7 @@ int mudclient_load_next_region(mudclient *mud, int lx, int ly) {
     mud->local_upper_x = section_x * REGION_SIZE + 32;
     mud->local_upper_y = section_y * REGION_SIZE + 32;
 
+    printf("%d %d\n", lx, ly);
     world_load_section(mud->world, lx, ly, mud->last_plane_index);
 
     mud->region_x -= mud->plane_width;
@@ -4943,6 +4959,7 @@ void mudclient_draw(mudclient *mud) {
     if (mud->logged_in == 0) {
         mudclient_reset_game(mud);
         mud->world->player_alive = true;
+        mudclient_load_next_region(mud, 50 * 48 + 23, 50 * 48 + 23);
     } else if (mud->logged_in == 1) {
         mud->surface->draw_string_shadow = 1;
         mudclient_draw_game(mud);

@@ -223,8 +223,8 @@ void mudclient_draw_ui_tab_minimap(mudclient *mud, int no_menus) {
         delta_x = mud->local_player->current_y - delta_x;
 
         if (mud->mouse_button_click == 1) {
-            mud->local_player->current_x = delta_x;
-            mud->local_player->current_y = delta_y;
+            mud->local_player->current_x = delta_y;
+            mud->local_player->current_y = delta_x;
 
             mud->mouse_button_click = 0;
         }
