@@ -4228,17 +4228,6 @@ void mudclient_draw_game(mudclient *mud) {
 }
 
 void mudclient_draw(mudclient *mud) {
-#ifdef EMSCRIPTEN
-    if (get_ticks() - last_canvas_check > 1000) {
-        if (can_resize() && (get_window_width() != mud->game_width ||
-                             get_window_height() != mud->game_height)) {
-            mudclient_on_resize(mud);
-        }
-
-        last_canvas_check = get_ticks();
-    }
-#endif
-
     if (mud->error_loading_data) {
         /* TODO draw error */
         // mud_log("ERROR LOADING DATA\n");
