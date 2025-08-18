@@ -1877,11 +1877,6 @@ void mudclient_load_maps(mudclient *mud) {
 }
 
 void mudclient_load_sounds(mudclient *mud) {
-    char jag[16];
-
-    snprintf(jag, sizeof(jag), "sounds%d.mem", mud->options->version_sounds);
-
-    mud->sound_data = mudclient_read_data_file(mud, jag, "Sound effects", 90);
 }
 
 void mudclient_reset_game(mudclient *mud) {
@@ -2162,14 +2157,6 @@ void mudclient_start_game(mudclient *mud) {
     }
 
     mudclient_load_maps(mud);
-
-    if (mud->error_loading_data) {
-        return;
-    }
-
-    if (mud->options->members && !mud->options->lowmem) {
-        mudclient_load_sounds(mud);
-    }
 
     if (mud->error_loading_data) {
         return;
@@ -4702,47 +4689,6 @@ void mudclient_send_logout(mudclient *mud) {
 }
 
 void mudclient_play_sound(mudclient *mud, char *name) {
-    if (!mud->options->members || mud->settings_sound_disabled ||
-        mud->options->lowmem) {
-        return;
-    }
-
-#ifdef _3DS
-    if (mud->_3ds_sound_position != -1) {
-        return;
-    }
-#endif
-
-    char file_name[strlen(name) + 5];
-    sprintf(file_name, "%s.pcm", name);
-
-    uint32_t offset = get_data_file_offset(file_name, mud->sound_data);
-
-    if (offset == 0) {
-        return;
-    }
-
-    uint32_t length = get_data_file_length(file_name, mud->sound_data);
-
-    memset(mud->pcm_out, 0, PCM_LENGTH * sizeof(uint16_t));
-
-    ulaw_to_linear(length, (uint8_t *)mud->sound_data + offset, mud->pcm_out);
-
-#ifdef WII
-    // ASND_StopVoice(0);
-
-    ASND_SetVoice(0, VOICE_MONO_16BIT_BE, SAMPLE_RATE, 0, mud->pcm_out,
-                  length * 2, 127, 127, NULL);
-#elif defined(_3DS)
-    mud->_3ds_sound_position = 0;
-    mud->_3ds_sound_length = length * 2;
-#elif defined(SDL_VERSION_ATLEAST)
-#if SDL_VERSION_ATLEAST(2, 0, 4)
-    // TODO could re-pause after sound plays?
-    SDL_PauseAudio(0);
-    SDL_QueueAudio(1, mud->pcm_out, length * 2);
-#endif
-#endif
 }
 
 int mudclient_walk_to(mudclient *mud, int start_x, int start_y, int x1, int y1,
