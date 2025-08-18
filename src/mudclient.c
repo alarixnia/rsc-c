@@ -156,6 +156,7 @@ void world_add_entities(mudclient *mud) {
     int server_index = 0;
 
     mud->ground_item_count = 0;
+    mud->object_count = 0;
 
     for (int x = 0; x < 94; x++) {
         for (int y = 0; y < 94; y++) {
@@ -194,8 +195,98 @@ void world_add_entities(mudclient *mud) {
                 }
 
                 mud->ground_item_count++;
+            } else if (diagonal >= 48000) {
+                int object_id = diagonal - 48000 - 1;
+
+                if (object_id >= game_data.object_count) {
+                    object_id = ODD_WELL_ID;
+                }
+                if (mud->object_count >= OBJECTS_MAX) {
+                    return;
+                }
+
+                int tile_direction =
+                    world_get_tile_direction(mud->world, x, y);
+
+                int width = 0;
+                int height = 0;
+
+                if (tile_direction == 0 || tile_direction == 4) {
+                    width = game_data.objects[object_id].width;
+                    height = game_data.objects[object_id].height;
+                } else {
+                    height = game_data.objects[object_id].width;
+                    width = game_data.objects[object_id].height;
+                }
+
+                int model_x = ((x + x + width) * MAGIC_LOC) / 2;
+                int model_y = ((y + y + height) * MAGIC_LOC) / 2;
+                int model_index = game_data.objects[object_id].model_index;
+
+                GameModel *model =
+                    game_model_copy(mud->game_models[model_index]);
+
+                scene_add_model(mud->scene, model);
+
+                model->key = mud->object_count;
+
+                game_model_rotate(model, 0, tile_direction * 32, 0);
+
+                game_model_translate(
+                    model, model_x,
+                    -world_get_elevation(mud->world, model_x, model_y),
+                    model_y);
+
+                game_model_set_light(model, 1, 48, 48, -50, -10, -50);
+
+                world_register_object(mud->world, x, y,
+                                      object_id);
+
+                if (object_id == WINDMILL_SAILS_ID) {
+                    game_model_translate(model, 0, -480, 0);
+                }
+
+                mud->objects[mud->object_count].x = x;
+                mud->objects[mud->object_count].y = y;
+                mud->objects[mud->object_count].id = object_id;
+                mud->objects[mud->object_count].direction = tile_direction;
+                mud->objects[mud->object_count++].model = model;
+
+                if (width > 1 || height > 1) {
+                    for (int xx = x; xx < x + width; xx++) {
+                        for (int yy = y; yy < y + height; yy++) {
+                            if ((xx > x || yy > y) &&
+                                world_get_wall_diagonal(mud->world, xx, yy) -
+                                        48001 ==
+                                    object_id) {
+                                int object_x = xx;
+                                int object_y = yy;
+                                int8_t plane = 0;
+
+                                if (object_x >= REGION_SIZE &&
+                                    object_y < REGION_SIZE) {
+                                    plane = 1;
+                                    object_x -= REGION_SIZE;
+                                } else if (object_x < REGION_SIZE &&
+                                           object_y >= REGION_SIZE) {
+                                    plane = 2;
+                                    object_y -= REGION_SIZE;
+                                } else if (object_x >= REGION_SIZE &&
+                                           object_y >= REGION_SIZE) {
+                                    plane = 3;
+                                    object_x -= REGION_SIZE;
+                                    object_y -= REGION_SIZE;
+                                }
+
+                                mud->world->walls_diagonal[plane]
+                                                     [object_x * REGION_SIZE +
+                                                      object_y] = 0;
+                            }
+                        }
+                    }
+                }
             }
-        }
+       }
     }
 }
 
@@ -2116,9 +2207,7 @@ int mudclient_load_next_region(mudclient *mud, int lx, int ly) {
     mud->local_upper_x = section_x * REGION_SIZE + 32;
     mud->local_upper_y = section_y * REGION_SIZE + 32;
 
-    printf("%d %d\n", lx, ly);
     world_load_section(mud->world, lx, ly, mud->last_plane_index);
-    world_add_models(mud->world, mud->game_models);
 
     mud->region_x -= mud->plane_width;
     mud->region_y -= mud->plane_height;
