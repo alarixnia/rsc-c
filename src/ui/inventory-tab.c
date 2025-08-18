@@ -15,11 +15,7 @@ void mudclient_draw_ui_tab_inventory(mudclient *mud, int no_menus) {
     int ui_y = UI_BUTTON_SIZE + 1;
 
     if (is_touch) {
-        if (mud->show_dialog_bank) {
-            ui_x = mud->surface->width - width - 5;
-        } else {
-            ui_x = UI_TABS_TOUCH_X - width - 1;
-        }
+        ui_x = UI_TABS_TOUCH_X - width - 1;
 
         ui_y = (UI_TABS_TOUCH_Y + UI_TABS_TOUCH_HEIGHT) - height - 2;
     }
@@ -109,12 +105,6 @@ void mudclient_draw_ui_tab_inventory(mudclient *mud, int no_menus) {
 
     if (mud->selected_wiki) {
         mudclient_menu_add_id_wiki(mud, formatted_item_name, "item", item_id);
-    } else if (mud->show_dialog_bank) {
-        int item_amount = mudclient_get_inventory_count(mud, item_id);
-
-        mudclient_add_offer_menus(mud, "Deposit", MENU_BANK_DEPOSIT, item_id,
-                                  item_amount, formatted_item_name,
-                                  mud->bank_last_deposit_offer);
     } else {
         if (mud->selected_spell >= 0) {
             if (game_data.spells[mud->selected_spell].type == 3) {

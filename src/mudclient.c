@@ -142,12 +142,6 @@ void mudclient_new(mudclient *mud) {
     mud->_3ds_sound_position = -1;
 #endif
 
-    /* set by the server to 192 on p2p servers */
-    mud->bank_items_max = 48;
-
-    mud->bank_selected_item_slot = -1;
-    mud->bank_selected_item = -2;
-
     mud->sprite_media = 2000;
     mud->sprite_util = mud->sprite_media + 100;
     mud->sprite_item = mud->sprite_util + 50;
@@ -1835,8 +1829,6 @@ void mudclient_reset_game(mudclient *mud) {
     mud->mouse_button_click = 0;
     mud->last_mouse_button_down = 0;
     mud->mouse_button_down = 0;
-    mud->show_dialog_shop = 0;
-    mud->show_dialog_bank = 0;
     mud->friend_list_count = 0;
 }
 
@@ -2365,37 +2357,6 @@ GameCharacter *mudclient_add_npc(mudclient *mud, int server_index, int x, int y,
     return npc;
 }
 
-void mudclient_update_bank_items(mudclient *mud) {
-    mud->bank_item_count = mud->new_bank_item_count;
-
-    for (int i = 0; i < mud->new_bank_item_count; i++) {
-        mud->bank_items[i] = mud->new_bank_items[i];
-        mud->bank_items_count[i] = mud->new_bank_items_count[i];
-    }
-
-    for (int i = 0; i < mud->inventory_items_count; i++) {
-        if (mud->bank_item_count >= mud->bank_items_max) {
-            break;
-        }
-
-        int inventory_id = mud->inventory_item_id[i];
-        int has_item_in_bank = 0;
-
-        for (int j = 0; j < mud->bank_item_count; j++) {
-            if (mud->bank_items[j] == inventory_id) {
-                has_item_in_bank = 1;
-                break;
-            }
-        }
-
-        if (!has_item_in_bank) {
-            mud->bank_items[mud->bank_item_count] = inventory_id;
-            mud->bank_items_count[mud->bank_item_count] = 0;
-            mud->bank_item_count++;
-        }
-    }
-}
-
 int mudclient_is_valid_camera_angle(mudclient *mud, int angle) {
     int x = mud->local_player->current_x / 128;
     int y = mud->local_player->current_y / 128;
@@ -2523,8 +2484,7 @@ void mudclient_handle_camera_zoom(mudclient *mud) {
         (mud->show_ui_tab == 0 || mud->show_ui_tab == MAP_TAB) &&
         !(mud->message_tab_selected != MESSAGE_TAB_ALL &&
           mud->mouse_y > exclude_min_y && mud->mouse_y <= exclude_max_y &&
-          mud->mouse_x <= exclude_max_x) &&
-        !mud->show_dialog_bank) {
+          mud->mouse_x <= exclude_max_x)) {
         mud->camera_zoom += mud->mouse_scroll_delta * 24;
     }
 
@@ -2710,33 +2670,8 @@ void mudclient_handle_game_input(mudclient *mud) {
         mud->last_mouse_button_down = 0;
     }
 
-    if (mud->show_dialog_trade || mud->show_dialog_duel ||
-        (mud->show_dialog_shop && mud->options->hold_to_buy)) {
-
-        if (mud->mouse_button_down != 0) {
-            mud->mouse_button_down_time++;
-        } else {
-            mud->mouse_button_down_time = 0;
-        }
-
-        if (mud->mouse_button_down_time > 600) {
-            mud->mouse_item_count_increment += 5000;
-        } else if (mud->mouse_button_down_time > 450) {
-            mud->mouse_item_count_increment += 500;
-        } else if (mud->mouse_button_down_time > 300) {
-            mud->mouse_item_count_increment += 50;
-        } else if (mud->mouse_button_down_time > 150) {
-            mud->mouse_item_count_increment += 5;
-        } else if (mud->mouse_button_down_time > 50) {
-            mud->mouse_item_count_increment++;
-        } else if (mud->mouse_button_down_time > 20 &&
-                   (mud->mouse_button_down_time & 5) == 0) {
-            mud->mouse_item_count_increment++;
-        }
-    } else {
-        mud->mouse_button_down_time = 0;
-        mud->mouse_item_count_increment = 0;
-    }
+    mud->mouse_button_down_time = 0;
+    mud->mouse_item_count_increment = 0;
 
     if (mud->last_mouse_button_down == 1) {
         mud->mouse_button_click = 1;

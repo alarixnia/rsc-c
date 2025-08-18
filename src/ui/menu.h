@@ -65,7 +65,6 @@ typedef enum {
 } MenuType;
 
 #include "../mudclient.h"
-#include "transaction.h"
 
 /* for mouse picking */
 #define PLAYER_FACE_TAG 10000

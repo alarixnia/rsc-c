@@ -69,10 +69,6 @@ void mudclient_draw_magic_icon(mudclient *mud, int x, int y, int is_selected) {
 void mudclient_draw_ui_tabs(mudclient *mud) {
     int is_touch = mudclient_is_touch(mud);
 
-    if (mud->show_dialog_bank && mud->surface->width >= 680 && is_touch) {
-        return;
-    }
-
     int button_y = 3;
 
     if (mud->options->version_media >= 59) {

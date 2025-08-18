@@ -220,30 +220,6 @@ void mudclient_menu_item_click(mudclient *mud, int i) {
         if (mud->options->condense_item_amounts) {
             char *item_name = game_data.items[menu_index].name;
 
-            if (mud->show_dialog_bank) {
-                for (int j = 0; j < mud->bank_item_count; j++) {
-                    int bank_count = mud->bank_items_count[j];
-
-                    if (mud->bank_items[j] == menu_index &&
-                        bank_count >= 100000) {
-                        char formatted_amount[15] = {0};
-
-                        mudclient_format_number_commas(mud, bank_count,
-                                                       formatted_amount);
-
-                        char formatted_total[64];
-
-                        snprintf(formatted_total, sizeof(formatted_total),
-                                 "Total %s in bank: %s", item_name,
-                                 formatted_amount);
-
-                        mudclient_show_message(mud, formatted_total,
-                                               MESSAGE_TYPE_GAME);
-                        break;
-                    }
-                }
-            }
-
             int inventory_amount =
                 mudclient_get_inventory_count(mud, menu_index);
 
@@ -427,58 +403,6 @@ void mudclient_menu_item_click(mudclient *mud, int i) {
 
         mud->selected_spell = -1;
         break;
-    case MENU_BANK_WITHDRAW:
-    case MENU_BANK_DEPOSIT: {
-        int is_withdraw = menu_type == MENU_BANK_WITHDRAW;
-
-        if (menu_target_index < 0) {
-            mud->bank_offer_type =
-                is_withdraw ? BANK_OFFER_WITHDRAW : BANK_OFFER_DEPOSIT;
-
-            mud->offer_id = menu_index;
-            mud->offer_max = abs(menu_target_index);
-
-            mud->input_digits_final = 0;
-            mud->show_dialog_offer_x = 1;
-        } else {
-            mudclient_bank_transaction(mud, menu_index, menu_target_index,
-                                       is_withdraw ? CLIENT_BANK_WITHDRAW
-                                                   : CLIENT_BANK_DEPOSIT);
-        }
-        break;
-    }
-    case MENU_TRANSACTION_OFFER: {
-        if (menu_target_index < 0) {
-            mud->transaction_offer_type = TRANSACTION_OFFER_OFFER;
-            mud->offer_id = menu_index;
-            mud->offer_max = abs(menu_target_index);
-            mud->input_digits_final = 0;
-            mud->show_dialog_offer_x = 1;
-        } else {
-            mudclient_offer_transaction_item(mud,
-                                             mud->show_dialog_trade
-                                                 ? CLIENT_TRADE_ITEM_UPDATE
-                                                 : CLIENT_DUEL_ITEM_UPDATE,
-                                             menu_index, menu_target_index);
-        }
-        break;
-    }
-    case MENU_TRANSACTION_REMOVE: {
-        if (menu_target_index < 0) {
-            mud->transaction_offer_type = TRANSACTION_OFFER_REMOVE;
-            mud->offer_id = menu_index;
-            mud->offer_max = abs(menu_target_index);
-            mud->input_digits_final = 0;
-            mud->show_dialog_offer_x = 1;
-        } else {
-            mudclient_remove_transaction_item(mud,
-                                              mud->show_dialog_trade
-                                                  ? CLIENT_TRADE_ITEM_UPDATE
-                                                  : CLIENT_DUEL_ITEM_UPDATE,
-                                              menu_index, menu_target_index);
-        }
-        break;
-    }
     case MENU_MAP_LOOK:
         mud->camera_rotation = menu_index;
         break;
@@ -1621,8 +1545,7 @@ void mudclient_draw_right_click_menu(mudclient *mud) {
     }
 
     /* make it a bit darker for the item interfaces */
-    int is_dark_menu = mud->show_dialog_bank || mud->show_dialog_trade ||
-                       mud->show_dialog_duel;
+    int is_dark_menu = false;
 
     surface_draw_box_alpha(mud->surface, mud->menu_x, mud->menu_y,
                            mud->menu_width, mud->menu_height, GREY_D0,

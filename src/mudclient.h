@@ -297,10 +297,8 @@ typedef struct mudclient mudclient;
 #include "world.h"
 
 #include "ui/additional-options.h"
-#include "ui/bank.h"
 #include "ui/combat-style.h"
 #include "ui/confirm.h"
-#include "ui/duel.h"
 #include "ui/experience-drops.h"
 #include "ui/logout.h"
 #include "ui/lost-connection.h"
@@ -310,11 +308,9 @@ typedef struct mudclient mudclient;
 #include "ui/option-menu.h"
 #include "ui/options-tab.h"
 #include "ui/server-message.h"
-#include "ui/shop.h"
 #include "ui/social-tab.h"
 #include "ui/stats-tab.h"
 #include "ui/status-bars.h"
-#include "ui/trade.h"
 #include "ui/ui-tabs.h"
 #include "ui/wilderness-warning.h"
 
@@ -896,74 +892,6 @@ struct mudclient {
     /* extra page for compact mode */
     int server_message_page;
     char server_message_next[4096];
-
-    /* ./ui/bank.c */
-    int8_t show_dialog_bank;
-    int new_bank_item_count;
-    int new_bank_items[BANK_ITEMS_MAX];
-    int new_bank_items_count[BANK_ITEMS_MAX];
-    int bank_item_count;
-    int bank_items[BANK_ITEMS_MAX];
-    int bank_items_count[BANK_ITEMS_MAX];
-    int bank_items_max;
-    int bank_active_page;
-    int bank_selected_item_slot;
-    int bank_selected_item;
-    int bank_offer_type;
-    int bank_last_deposit_offer;
-    int bank_last_withdraw_offer;
-    int bank_scroll_row;
-    int bank_last_scroll;
-    int8_t bank_handle_dragged;
-    int bank_visible_rows;
-    int8_t bank_search_focus;
-
-    /* ./ui/shop.c */
-    int8_t show_dialog_shop;
-    int shop_items[SHOP_ITEMS_MAX];
-    int shop_items_count[SHOP_ITEMS_MAX];
-    int shop_items_price[SHOP_ITEMS_MAX];
-    int shop_selected_item_index;
-    int shop_selected_item_type;
-    int shop_buy_price_mod;
-    int shop_sell_price_mod;
-
-    /* ./ui/transaction.c */
-    int transaction_item_count;
-    int transaction_items[TRADE_ITEMS_MAX];
-    int transaction_items_count[TRADE_ITEMS_MAX];
-    int transaction_recipient_accepted;
-    int transaction_accepted;
-    char transaction_recipient_name[USERNAME_LENGTH + 1];
-    int transaction_recipient_item_count;
-    int transaction_recipient_items[TRADE_ITEMS_MAX];
-    int transaction_recipient_items_count[TRADE_ITEMS_MAX];
-    int transaction_selected_item;
-    int transaction_last_offer;
-    int transaction_offer_type;
-    int transaction_tab; /* used for compact mode */
-
-    int64_t transaction_recipient_confirm_name;
-    int transaction_confirm_item_count;
-    int transaction_confirm_items[TRADE_ITEMS_MAX];
-    int transaction_confirm_items_count[TRADE_ITEMS_MAX];
-    int transaction_recipient_confirm_item_count;
-    int transaction_recipient_confirm_items[TRADE_ITEMS_MAX];
-    int transaction_recipient_confirm_items_count[TRADE_ITEMS_MAX];
-    int transaction_confirm_accepted;
-
-    /* ./ui/trade.c */
-    int8_t show_dialog_trade;
-    int8_t show_dialog_trade_confirm;
-
-    /* ./ui/duel.c */
-    int8_t show_dialog_duel;
-    int8_t show_dialog_duel_confirm;
-
-    int8_t duel_option_retreat;
-    int8_t duel_option_magic;
-    int8_t duel_option_prayer;
-    int8_t duel_option_weapons;
 
     /* ./ui/offer-x.c */
     int8_t show_dialog_offer_x;
