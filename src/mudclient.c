@@ -152,6 +152,28 @@ void mudclient_new(mudclient *mud) {
     mud->sprite_texture_world = mud->sprite_texture + 10;
 }
 
+void add_wall_object(mudclient *mud, int id, int x, int y, int dir) {
+    if (id >= game_data.wall_object_count) {
+        id = ODD_LOOKING_WALL_ID;
+    }
+    if (mud->wall_object_count >= WALL_OBJECTS_MAX) {
+        return;
+    }
+
+    world_register_wall_object(mud->world, x, y, dir,
+                                       id);
+
+    GameModel *model = mudclient_create_wall_object(
+        mud, x, y, dir, id, mud->wall_object_count);
+
+    mud->wall_objects[mud->wall_object_count].model = model;
+    mud->wall_objects[mud->wall_object_count].x = x;
+    mud->wall_objects[mud->wall_object_count].y = y;
+    mud->wall_objects[mud->wall_object_count].id = id;
+
+    mud->wall_objects[mud->wall_object_count++].direction= dir;
+}
+
 void world_add_entities(mudclient *mud) {
     int server_index = 0;
 
@@ -186,7 +208,7 @@ void world_add_entities(mudclient *mud) {
     mud->npc_count = 0;
 
     GameCharacter *freed_characters[NPCS_SERVER_MAX] = {0};
-    size_t freed_count = 0;
+    int freed_count = 0;
 
     for (int i = 0; i < NPCS_SERVER_MAX; i++) {
         GameCharacter *npc = mud->npcs_server[i];
@@ -218,8 +240,28 @@ void world_add_entities(mudclient *mud) {
 
     for (int x = 0; x < 94; x++) {
         for (int y = 0; y < 94; y++) {
+            int ns = world_get_wall_north_south(mud->world, x, y);
+            if (ns > 0) {
+                if (game_data.wall_objects[ns - 1].interactive) {
+                    add_wall_object(mud, ns - 1, x, y, 1);
+                }
+            }
+            int ew = world_get_wall_east_west(mud->world, x, y);
+            if (ew > 0) {
+                if (game_data.wall_objects[ns - 1].interactive) {
+                    add_wall_object(mud, ns - 1, x, y, 0);
+                }
+            }
             int diagonal = world_get_wall_diagonal(mud->world, x, y);
-            if (diagonal >= 24000 && diagonal <= 36000) {
+            if (diagonal > 0 && diagonal < 12000) {
+                if (game_data.wall_objects[diagonal - 1].interactive) {
+                    add_wall_object(mud, diagonal - 1, x, y, 3);
+                }
+            } else if (diagonal >= 12000 && diagonal <= 24000) {
+                if (game_data.wall_objects[diagonal - 12000 - 1].interactive) {
+                    add_wall_object(mud, diagonal - 12000 - 1, x, y, 2);
+                }
+            } else if (diagonal >= 24000 && diagonal <= 36000) {
                 mudclient_add_npc(mud, server_index++,
                     (x * MAGIC_LOC) + 64,
                     (y * MAGIC_LOC) + 64,
@@ -389,23 +431,12 @@ void mudclient_resize(mudclient *mud) {
 
         mud->scene->raster = mud->surface->pixels;
 
-        int is_compact = mud->surface->width < MUD_VANILLA_WIDTH ||
-                         mud->surface->height < MUD_VANILLA_HEIGHT;
-
         int is_touch = mudclient_is_touch(mud);
 
         int full_offset_x = mud->surface->width - MUD_WIDTH;
         int full_offset_y = mud->surface->height - MUD_HEIGHT;
         int half_offset_x = (mud->surface->width / 2) - (MUD_WIDTH / 2);
         int half_offset_y = (mud->surface->height / 2) - (MUD_HEIGHT / 2);
-
-        int dynamic_offset_x =
-            (mud->surface->width / 2) -
-            (is_compact ? MUD_MIN_WIDTH : MUD_VANILLA_WIDTH) / 2;
-
-        int dynamic_offset_y =
-            (mud->surface->height / 2) -
-            (is_compact ? MUD_MIN_HEIGHT : MUD_VANILLA_HEIGHT) / 2;
 
         if (mud->panel_message_tabs != NULL && !is_touch) {
             mud->panel_message_tabs->offset_y = full_offset_y;
@@ -4717,6 +4748,9 @@ void mudclient_play_sound(mudclient *mud, char *name) {
 int mudclient_walk_to(mudclient *mud, int start_x, int start_y, int x1, int y1,
                       int x2, int y2, int check_objects, int walk_to_action,
                       int first_step) {
+    if (mud->loading_area) {
+        return 0;
+    }
     if (x2 >= 0 && y2 >= 0 && y2 <= 64 && y2 <= 64) {
         mud->local_player->current_x = x2 * MAGIC_LOC + 64;
         mud->local_player->current_y = y2 * MAGIC_LOC + 64;

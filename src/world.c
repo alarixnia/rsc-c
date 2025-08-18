@@ -2,14 +2,12 @@
 
 static void world_set_blocked(World *, int, int, int);
 static void world_set_unblocked(World *, int, int, int);
-static int world_get_wall_east_west(World *, int, int);
 static void world_map_set_pixel(World *, int, int, int);
 static void world_load_section_jm(World *, uint8_t *, size_t, int);
 static int world_get_object_adjacency(World *, int, int);
 static int world_has_roof(World *, int, int);
 static int world_get_terrain_colour(World *, int, int);
 static void world_fill_edges(World *);
-static int world_get_wall_north_south(World *, int, int);
 static int world_get_tile_decoration(World *, int, int);
 static int world_decoration_or_colour(World *, int, int, int);
 static void world_set_tile_decoration(World *, int, int, int);
@@ -85,7 +83,7 @@ static int get_byte_plane_coord(int8_t plane_array[PLANE_COUNT][TILE_COUNT],
     return plane_array[height][x * REGION_SIZE + y] & 0xff;
 }
 
-static int world_get_wall_east_west(World *world, int x, int y) {
+int world_get_wall_east_west(World *world, int x, int y) {
     return get_byte_plane_coord(world->walls_east_west, x, y);
 }
 
@@ -755,7 +753,7 @@ static void world_fill_edges(World *world) {
     }
 }
 
-static int world_get_wall_north_south(World *world, int x, int y) {
+int world_get_wall_north_south(World *world, int x, int y) {
     return get_byte_plane_coord(world->walls_north_south, x, y);
 }
 

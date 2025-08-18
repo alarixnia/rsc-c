@@ -119,6 +119,8 @@ int world_get_wall_diagonal(World *world, int x, int y);
 int world_get_tile_direction(World *world, int x, int y);
 int world_get_elevation(World *world, int x, int y);
 int world_get_wall_roof(World *world, int x, int y);
+int world_get_wall_north_south(World *world, int x, int y);
+int world_get_wall_east_west(World *world, int x, int y);
 void world_register_wall_object(World *world, int x, int y, int dir, int id);
 void world_register_object(World *world, int x, int y, int id);
 void world_remove_object(World *world, int x, int y, int id);
