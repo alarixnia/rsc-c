@@ -2817,6 +2817,7 @@ int mudclient_load_next_region(mudclient *mud, int lx, int ly) {
 
     printf("%d %d\n", lx, ly);
     world_load_section(mud->world, lx, ly, mud->last_plane_index);
+    world_add_models(mud->world, mud->game_models);
 
     mud->region_x -= mud->plane_width;
     mud->region_y -= mud->plane_height;
