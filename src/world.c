@@ -3,7 +3,6 @@
 static void world_set_blocked(World *, int, int, int);
 static void world_set_unblocked(World *, int, int, int);
 static int world_get_wall_east_west(World *, int, int);
-static int world_get_wall_diagonal(World *, int, int);
 static void world_map_set_pixel(World *, int, int, int);
 static void world_load_section_jm(World *, uint8_t *, size_t, int);
 static int world_get_object_adjacency(World *, int, int);
@@ -138,7 +137,7 @@ int world_get_elevation(World *world, int x, int y) {
             ((height_south * a_y) / TILE_SIZE));
 }
 
-static int world_get_wall_diagonal(World *world, int x, int y) {
+int world_get_wall_diagonal(World *world, int x, int y) {
     if (x < 0 || x >= REGION_WIDTH || y < 0 || y >= REGION_HEIGHT) {
         return 0;
     }

@@ -393,13 +393,7 @@ void mudclient_handle_message_tabs_input(mudclient *mud) {
             panel_get_text(mud->panel_message_tabs, mud->control_text_list_all);
 
         if (strncmp(message, "::", 2) == 0) {
-            if (strncasecmp(message + 2, "closecon", 8) == 0) {
-                packet_stream_close(mud->packet_stream);
-            } else if (strncasecmp(message + 2, "logout", 6) == 0) {
-                mudclient_close_connection(mud);
-            } else if (strncasecmp(message + 2, "lostcon", 7) == 0) {
-                mudclient_lost_connection(mud);
-            } else if (strncasecmp(message + 2, "displayfps", 10) == 0) {
+            if (strncasecmp(message + 2, "displayfps", 10) == 0) {
                 mud->options->display_fps = !mud->options->display_fps;
             } else {
                 mudclient_send_command_string(mud, message + 2);

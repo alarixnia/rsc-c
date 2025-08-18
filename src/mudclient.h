@@ -287,7 +287,6 @@ typedef struct mudclient mudclient;
 #include "game-model.h"
 #include "lib/bzip.h"
 #include "options.h"
-#include "packet-handler.h"
 #include "packet-stream.h"
 #include "panel.h"
 #include "scene.h"
@@ -298,13 +297,11 @@ typedef struct mudclient mudclient;
 #include "world.h"
 
 #include "ui/additional-options.h"
-#include "ui/appearance.h"
 #include "ui/bank.h"
 #include "ui/combat-style.h"
 #include "ui/confirm.h"
 #include "ui/duel.h"
 #include "ui/experience-drops.h"
-#include "ui/login.h"
 #include "ui/logout.h"
 #include "ui/lost-connection.h"
 #include "ui/menu.h"
@@ -314,15 +311,12 @@ typedef struct mudclient mudclient;
 #include "ui/options-tab.h"
 #include "ui/server-message.h"
 #include "ui/shop.h"
-#include "ui/sleep.h"
 #include "ui/social-tab.h"
 #include "ui/stats-tab.h"
 #include "ui/status-bars.h"
 #include "ui/trade.h"
 #include "ui/ui-tabs.h"
-#include "ui/welcome.h"
 #include "ui/wilderness-warning.h"
-#include "ui/worldlist.h"
 
 #include "custom/clarify-herblaw-items.h"
 #include "custom/diverse-npcs.h"
@@ -664,38 +658,6 @@ struct mudclient {
     GameModel *game_models[GAME_OBJECTS_MAX];
     GameModel **item_models;
 
-    /* ./ui/login.c */
-    Panel *panel_login_welcome;
-    Panel *panel_login_new_user;
-    Panel *panel_login_existing_user;
-    int control_welcome_new_user;
-    int control_welcome_existing_user;
-    int control_welcome_options;
-    int control_welcome_worlds;
-    int refer_id;
-    int control_login_new_ok;
-    int control_register_status;
-    int control_register_status_bottom;
-    int control_register_user;
-    int control_register_password;
-    int control_register_confirm_password;
-    int control_register_checkbox;
-    int control_register_submit;
-    int control_register_cancel;
-    int control_login_status;
-    int control_login_status_bottom;
-    int control_login_username;
-    int control_login_password;
-    int control_login_ok;
-    int control_login_cancel;
-    int control_login_recover;
-
-    LOGIN_STAGE login_screen;
-    char login_username[USERNAME_LENGTH + 1];
-    char login_pass[PASSWORD_LENGTH + 1];
-    char *login_prompt;
-    char login_username_display[USERNAME_LENGTH + 3];
-
 #ifdef REVISION_177
     int session_id;
 #else
@@ -760,13 +722,6 @@ struct mudclient {
 
     int ground_item_count;
     struct ItemSpawn ground_items[GROUND_ITEMS_MAX];
-
-    /* ./ui/sleep.c */
-    int8_t is_sleeping;
-    int sleep_word_delay_timer;
-    int sleep_word_delay;
-    int fatigue_sleeping;
-    char *sleeping_status_text;
 
     /* fade distant landscape */
     int8_t fog_of_war;
@@ -918,31 +873,6 @@ struct mudclient {
 
     int walk_path_x[PATH_STEPS_MAX];
     int walk_path_y[PATH_STEPS_MAX];
-
-    /* ./ui/appearance.c */
-    Panel *panel_appearance;
-    int control_appearance_head_left;
-    int control_appearance_head_right;
-    int control_appearance_hair_left;
-    int control_appearance_hair_right;
-    int control_appearance_gender_left;
-    int control_appearance_gender_right;
-    int control_appearance_top_left;
-    int control_appearance_top_right;
-    int control_appearance_skin_left;
-    int control_appearance_skin_right;
-    int control_appearance_bottom_left;
-    int control_appearance_bottom_right;
-    int control_appearance_accept;
-
-    int8_t show_appearance_change;
-    int appearance_head_type;
-    int appearance_head_gender;
-    int appearance_body_type;
-    int appearance_hair_colour;
-    int appearance_top_colour;
-    int appearance_skin_colour;
-    int appearance_bottom_colour;
 
     /* ./ui/option-menu.c */
     int8_t show_option_menu;

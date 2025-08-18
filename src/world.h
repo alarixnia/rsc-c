@@ -115,6 +115,7 @@ int world_route(World *world, int start_x, int start_y, int end_x1, int end_y1,
                 int end_x2, int end_y2, int *route_x, int *route_y,
                 int objects);
 int world_is_under_roof(World *world, int x, int y);
+int world_get_wall_diagonal(World *world, int x, int y);
 int world_get_tile_direction(World *world, int x, int y);
 int world_get_elevation(World *world, int x, int y);
 int world_get_wall_roof(World *world, int x, int y);

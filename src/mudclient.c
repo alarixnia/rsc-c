@@ -104,8 +104,6 @@ static const char *anims_older_is_better[] = {
     "head4",  "platemailtop",  "staff",     "body1", NULL};
 #endif
 
-char login_screen_status[255] = {0};
-
 void mudclient_new(mudclient *mud) {
     memset(mud, 0, sizeof(mudclient));
 
@@ -144,14 +142,6 @@ void mudclient_new(mudclient *mud) {
     mud->_3ds_sound_position = -1;
 #endif
 
-    mud->appearance_body_type = 1;
-    mud->appearance_hair_colour = 2;
-    mud->appearance_top_colour = 8;
-    mud->appearance_bottom_colour = 14;
-    mud->appearance_head_gender = 1;
-
-    mud->sleep_word_delay = 1;
-
     /* set by the server to 192 on p2p servers */
     mud->bank_items_max = 48;
 
@@ -166,6 +156,20 @@ void mudclient_new(mudclient *mud) {
     // TODO this is also used for sleep word
     mud->sprite_texture = mud->sprite_projectile + 50;
     mud->sprite_texture_world = mud->sprite_texture + 10;
+}
+
+void world_add_entities(mudclient *mud) {
+    for (int x = 0; x < 94; x++) {
+        for (int y = 0; y < 94; y++) {
+            int diagonal = world_get_wall_diagonal(mud->world, x, y);
+            if (diagonal >= 24000 && diagonal <= 36000) {
+                mudclient_add_npc(mud, 0,
+                    ((x + mud->region_x) * MAGIC_LOC) + 64,
+                    ((y + mud->region_x) * MAGIC_LOC) + 64,
+                    0, diagonal - 24000);
+            }
+        }
+    }
 }
 
 void mudclient_resize(mudclient *mud) {
@@ -205,27 +209,6 @@ void mudclient_resize(mudclient *mud) {
             calloc(mud->game_width * mud->game_height, sizeof(int32_t));
 #endif
 
-        panel_destroy(mud->panel_login_welcome);
-        free(mud->panel_login_welcome);
-
-        panel_destroy(mud->panel_login_new_user);
-        free(mud->panel_login_new_user);
-
-        panel_destroy(mud->panel_login_worldlist);
-        free(mud->panel_login_worldlist);
-
-        panel_destroy(mud->panel_login_existing_user);
-        free(mud->panel_login_existing_user);
-
-        worldlist_new(mud);
-
-        mudclient_create_login_panels(mud);
-
-        panel_destroy(mud->panel_appearance);
-        free(mud->panel_appearance);
-
-        mudclient_create_appearance_panel(mud);
-
         mud->scene->raster = mud->surface->pixels;
 
         int is_compact = mud->surface->width < MUD_VANILLA_WIDTH ||
@@ -245,31 +228,6 @@ void mudclient_resize(mudclient *mud) {
         int dynamic_offset_y =
             (mud->surface->height / 2) -
             (is_compact ? MUD_MIN_HEIGHT : MUD_VANILLA_HEIGHT) / 2;
-
-        if (mud->panel_login_welcome != NULL) {
-            mud->panel_login_welcome->offset_x = dynamic_offset_x;
-            mud->panel_login_welcome->offset_y = dynamic_offset_y;
-        }
-
-        if (mud->panel_login_new_user != NULL) {
-            mud->panel_login_new_user->offset_x = dynamic_offset_x;
-            mud->panel_login_new_user->offset_y = dynamic_offset_y;
-        }
-
-        if (mud->panel_login_existing_user != NULL) {
-            mud->panel_login_existing_user->offset_x = dynamic_offset_x;
-            mud->panel_login_existing_user->offset_y = dynamic_offset_y;
-        }
-
-        if (mud->panel_login_worldlist != NULL) {
-            mud->panel_login_worldlist->offset_x = dynamic_offset_x;
-            mud->panel_login_worldlist->offset_y = dynamic_offset_y;
-        }
-
-        if (mud->panel_appearance != NULL) {
-            mud->panel_appearance->offset_x = dynamic_offset_x;
-            mud->panel_appearance->offset_y = dynamic_offset_y;
-        }
 
         if (mud->panel_message_tabs != NULL && !is_touch) {
             mud->panel_message_tabs->offset_y = full_offset_y;
@@ -390,59 +348,6 @@ static void mudclient_start_application_common(struct mudclient *mud) {
 #endif
 
     mudclient_run(mud);
-}
-
-void mudclient_handle_key_press(mudclient *mud, int key_code) {
-    if (mud->show_additional_options) {
-        Panel *panel = mudclient_get_active_option_panel(mud);
-        panel_key_press(panel, key_code);
-        return;
-    }
-
-    if (!mud->logged_in) {
-        if (mud->login_screen == LOGIN_STAGE_WELCOME &&
-            mud->panel_login_welcome) {
-            panel_key_press(mud->panel_login_welcome, key_code);
-        }
-
-        if (mud->login_screen == LOGIN_STAGE_NEW && mud->panel_login_new_user) {
-            panel_key_press(mud->panel_login_new_user, key_code);
-        }
-
-        if (mud->login_screen == LOGIN_STAGE_EXISTING &&
-            mud->panel_login_existing_user) {
-            panel_key_press(mud->panel_login_existing_user, key_code);
-        }
-
-        /*if (mud->login_screen == 3 && mud->panel_recover_user) {
-            panel_key_press(mud->panel_recover_user, key_code);
-        }*/
-    } else {
-        if (mud->show_appearance_change && mud->panel_appearance) {
-            panel_key_press(mud->panel_appearance, key_code);
-            return;
-        }
-
-        if (mud->show_change_password_step == PASSWORD_STEP_NONE &&
-            mud->show_dialog_social_input == 0 &&
-            mud->show_dialog_offer_x == 0 &&
-            !(mud->bank_search_focus && mud->show_dialog_bank) &&
-            /*mud->show_dialog_report_abuse_step == 0 &&*/
-            !mud->is_sleeping && mud->panel_message_tabs) {
-            int is_option_number = mud->options->option_numbers &&
-                                   mud->show_option_menu && key_code >= '1' &&
-                                   key_code <= '5';
-
-            if (!is_option_number) {
-                panel_key_press(mud->panel_message_tabs, key_code);
-            }
-        }
-
-        if (mud->show_change_password_step == PASSWORD_STEP_MISMATCH ||
-            mud->show_change_password_step == PASSWORD_STEP_FINISHED) {
-            mud->show_change_password_step = PASSWORD_STEP_NONE;
-        }
-    }
 }
 
 void mudclient_key_pressed(mudclient *mud, int code, int char_code) {
@@ -1777,7 +1682,6 @@ void mudclient_reset_game(mudclient *mud) {
 
     mud->combat_style = 0;
     mud->logout_timeout = 0;
-    mud->login_screen = 0;
     mud->logged_in = 1;
 
     memset(mud->input_pm_current, '\0', INPUT_PM_LENGTH + 1);
@@ -1900,500 +1804,7 @@ void mudclient_reset_game(mudclient *mud) {
     mud->mouse_button_down = 0;
     mud->show_dialog_shop = 0;
     mud->show_dialog_bank = 0;
-    mud->is_sleeping = 0;
     mud->friend_list_count = 0;
-}
-
-void mudclient_login(mudclient *mud, char *username, char *password,
-                     int reconnecting) {
-    if (mud->world_full_timeout > 0) {
-        mudclient_show_login_screen_status(mud, "Please wait...",
-                                           "Connecting to server");
-
-        delay_ticks(2000);
-
-        mudclient_show_login_screen_status(
-            mud, "Sorry! the server is currently full.",
-            "Please try again later");
-
-        return;
-    }
-
-    if (strlen(username) == 0 || strlen(password) == 0) {
-        mudclient_show_login_screen_status(mud,
-                                           "You must enter both a username",
-                                           "and a password - Please try again");
-        return;
-    }
-
-    if (mud->username != username) {
-        strcpy(mud->username, username);
-    }
-
-    if (mud->password != password) {
-        strcpy(mud->password, password);
-    }
-
-    char formatted_username[USERNAME_LENGTH + 1] = {0};
-    format_auth_string(username, USERNAME_LENGTH, formatted_username);
-
-    char formatted_password[PASSWORD_LENGTH + 1] = {0};
-    format_auth_string(password, PASSWORD_LENGTH, formatted_password);
-
-    if (reconnecting) {
-#ifdef RENDER_3DS_GL
-        mudclient_3ds_gl_frame_start(mud, 0);
-#endif
-
-        mudclient_draw_lost_connection(mud);
-        surface_draw(mud->surface);
-
-#ifdef RENDER_GL
-#ifdef SDL12
-        SDL_GL_SwapBuffers();
-#else
-        SDL_GL_SwapWindow(mud->gl_window);
-#endif
-#elif defined(RENDER_3DS_GL)
-        mudclient_3ds_gl_frame_end();
-#endif
-    } else {
-        mudclient_show_login_screen_status(mud, "Please wait...",
-                                           "Connecting to server");
-    }
-
-    free(mud->packet_stream);
-    mud->packet_stream = malloc(sizeof(PacketStream));
-    packet_stream_new(mud->packet_stream, mud);
-
-    if (mud->packet_stream->closed) {
-        goto login_fail;
-    }
-
-#ifdef REVISION_177
-    int session_id = packet_stream_get_int(mud->packet_stream);
-    mud->session_id = session_id;
-#else
-    packet_stream_new_packet(mud->packet_stream, CLIENT_SESSION);
-
-    int64_t encoded_username = encode_username(formatted_username);
-
-    packet_stream_put_byte(mud->packet_stream,
-                           (int)((encoded_username >> 16) & 31));
-
-    if (packet_stream_flush_packet(mud->packet_stream) < 0) {
-        goto login_fail;
-    }
-
-    int64_t session_id = packet_stream_get_long(mud->packet_stream);
-    mud->session_id = session_id;
-#endif
-
-    if (mud->session_id == 0) {
-        mudclient_show_login_screen_status(mud, "Login server offline.",
-                                           "Please try again in a few mins");
-        return;
-    }
-
-#ifdef REVISION_177
-    mud_log("Session id: %d\n", session_id);
-
-    packet_stream_new_packet(mud->packet_stream,
-                             reconnecting ? CLIENT_RECONNECT : CLIENT_LOGIN);
-
-    packet_stream_put_short(mud->packet_stream, VERSION);
-
-    /* limit30 */
-    packet_stream_put_short(mud->packet_stream, 0);
-
-    packet_stream_put_long(mud->packet_stream,
-                           encode_username(formatted_username));
-
-    packet_stream_put_password(mud->packet_stream, session_id,
-                               formatted_password);
-
-    /* uid/randomDat */
-    packet_stream_put_int(mud->packet_stream, 0);
-
-    if (packet_stream_flush_packet(mud->packet_stream) < 0) {
-        goto login_fail;
-    }
-
-    packet_stream_get_byte(mud->packet_stream);
-
-    int response = packet_stream_get_byte(mud->packet_stream);
-#else
-#ifdef _3DS
-    mud_log("Verb: Session id: %lld\n", session_id); /* ? */
-#else
-    mud_log("Verb: Session id: %ld\n", session_id);
-#endif
-
-    uint32_t keys[4] = {0};
-    keys[0] = (int)(((float)rand() / (float)RAND_MAX) * (float)99999999);
-    keys[1] = (int)(((float)rand() / (float)RAND_MAX) * (float)99999999);
-    keys[2] = (int32_t)(session_id >> 32);
-    keys[3] = (int32_t)(session_id);
-
-    packet_stream_new_packet(mud->packet_stream, CLIENT_LOGIN);
-    packet_stream_put_byte(mud->packet_stream, reconnecting);
-    packet_stream_put_short(mud->packet_stream, VERSION);
-    packet_stream_put_byte(mud->packet_stream, 0); /* limit30 */
-
-    packet_stream_put_login_block(mud->packet_stream, formatted_username,
-                                  formatted_password, keys, 0);
-
-    if (packet_stream_flush_packet(mud->packet_stream) < 0) {
-        goto login_fail;
-    }
-
-    int response = packet_stream_get_byte(mud->packet_stream);
-#endif
-
-    mud_log("Login response: %d\n", response);
-
-    if (response == 0 || response == 1 || response == 25) {
-        mud->moderator_level = response == 25;
-        mud->auto_login_attempts = 0;
-
-        strcpy(mud->options->username,
-               mud->options->remember_username ? username : "");
-
-        strcpy(mud->options->password,
-               mud->options->remember_password ? password : "");
-
-        if (mud->options->remember_username ||
-            mud->options->remember_password) {
-            options_save(mud->options);
-        }
-
-        mudclient_reset_game(mud);
-        return;
-    }
-
-    /*if (response == 1) {
-        mud->auto_login_attempts = 0;
-        return;
-    }*/
-
-    if (reconnecting) {
-        mudclient_reset_login_screen(mud);
-        return;
-    }
-
-    // TODO enums
-    switch (response) {
-    case -1:
-        mudclient_show_login_screen_status(mud, "Error unable to login.",
-                                           "Server timed out");
-        return;
-    case 3:
-        mudclient_show_login_screen_status(
-            mud, "Invalid username or password.",
-            "Try again, or create a new account");
-        return;
-    case 4:
-        mudclient_show_login_screen_status(
-            mud, "That username is already logged in.",
-            "Wait 60 seconds then retry");
-        return;
-    case 5:
-        mudclient_show_login_screen_status(mud, "The client has been updated.",
-                                           "Please reload this page");
-        return;
-    case 6:
-        mudclient_show_login_screen_status(
-            mud, "You may only use 1 character at once.",
-            "Your ip-address is already in use");
-        return;
-    case 7:
-        mudclient_show_login_screen_status(mud, "Login attempts exceeded!",
-                                           "Please try again in 5 minutes");
-        return;
-    case 8:
-        mudclient_show_login_screen_status(mud, "Error unable to login.",
-                                           "Server rejected session");
-        return;
-    case 9:
-        mudclient_show_login_screen_status(mud, "Error unable to login.",
-                                           "Loginserver rejected session");
-        return;
-    case 10:
-        mudclient_show_login_screen_status(mud,
-                                           "That username is already in use.",
-                                           "Wait 60 seconds then retry");
-        return;
-    case 11:
-        mudclient_show_login_screen_status(
-            mud, "Account temporarily disabled.",
-            "Check your message inbox for details");
-        return;
-    case 12:
-        mudclient_show_login_screen_status(
-            mud, "Account permanently disabled.",
-            "Check your message inbox for details");
-        return;
-    case 14:
-        mudclient_show_login_screen_status(
-            mud, "Sorry! This world is currently full.",
-            "Please try a different world");
-
-        mud->world_full_timeout = 1500;
-        return;
-    case 15:
-        mudclient_show_login_screen_status(mud, "You need a members account",
-                                           "to login to this world");
-        return;
-    case 16:
-        mudclient_show_login_screen_status(
-            mud, "Error - no reply from loginserver.", "Please try again");
-        return;
-    case 17:
-        mudclient_show_login_screen_status(mud,
-                                           "Error - failed to decode profile.",
-                                           "Contact customer support");
-        return;
-    case 18:
-        mudclient_show_login_screen_status(
-            mud, "Account suspected stolen.",
-            "Press \"recover a locked account\" on front page.");
-        return;
-    case 20:
-        mudclient_show_login_screen_status(mud, "Error - loginserver mismatch",
-                                           "Please try a different world");
-        return;
-    case 21:
-        mudclient_show_login_screen_status(mud, "Unable to login.",
-                                           "That is not an RS-Classic account");
-        return;
-    case 22:
-        mudclient_show_login_screen_status(
-            mud, "Password suspected stolen.",
-            "Press \"change your password\" on front page.");
-        return;
-    default:
-        mudclient_show_login_screen_status(mud, "Error unable to login.",
-                                           "Unrecognised response code");
-        return;
-    }
-
-login_fail:
-    if (mud->auto_login_attempts > 0) {
-        int delay = 0;
-
-        while (delay < 5000) {
-            mudclient_poll_events(mud);
-            delay += 16;
-            delay_ticks(16);
-        }
-
-        mud->auto_login_attempts--;
-        mudclient_login(mud, username, password, reconnecting);
-        return;
-    }
-
-    if (reconnecting) {
-        mudclient_reset_login_screen(mud);
-        mud->login_screen = LOGIN_STAGE_EXISTING;
-    }
-
-    mudclient_show_login_screen_status(
-        mud, "Sorry! Unable to connect.",
-        "Check internet settings or try another world");
-}
-
-void mudclient_registration_login(mudclient *mud) {
-    char *username =
-        panel_get_text(mud->panel_login_new_user, mud->control_register_user);
-
-    char *password = panel_get_text(mud->panel_login_new_user,
-                                    mud->control_register_password);
-
-    mud->login_screen = 2;
-
-    panel_update_text(mud->panel_login_existing_user, mud->control_login_status,
-                      "Please enter your username and password");
-
-    panel_update_text(mud->panel_login_existing_user,
-                      mud->control_login_username, username);
-
-    panel_update_text(mud->panel_login_existing_user,
-                      mud->control_login_password, password);
-
-    mudclient_draw_login_screens(mud);
-    mudclient_reset_timings(mud);
-    mudclient_login(mud, username, password, 0);
-}
-
-void mudclient_register(mudclient *mud, char *username, char *password) {
-    if (mud->world_full_timeout > 0) {
-        mudclient_show_login_screen_status(mud, "Please wait...",
-                                           "Connecting to server");
-
-        delay_ticks(2000);
-
-        mudclient_show_login_screen_status(
-            mud, "Sorry! The server is currently full.",
-            "Please try again later");
-
-        return;
-    }
-
-    char formatted_username[USERNAME_LENGTH + 1] = {0};
-    format_auth_string(username, USERNAME_LENGTH, formatted_username);
-
-    char formatted_password[PASSWORD_LENGTH + 1] = {0};
-    format_auth_string(password, PASSWORD_LENGTH, formatted_password);
-
-    mudclient_show_login_screen_status(mud, "Please wait...",
-                                       "Connecting to server");
-
-    free(mud->packet_stream);
-    mud->packet_stream = malloc(sizeof(PacketStream));
-    packet_stream_new(mud->packet_stream, mud);
-
-    if (mud->packet_stream->closed) {
-        goto register_fail;
-    }
-
-#ifdef REVISION_177
-    int session_id = packet_stream_get_int(mud->packet_stream);
-    mud->session_id = session_id;
-#else
-    packet_stream_new_packet(mud->packet_stream, CLIENT_SESSION);
-
-    int64_t encoded_username = encode_username(formatted_username);
-
-    packet_stream_put_byte(mud->packet_stream,
-                           (int)((encoded_username >> 16) & 31));
-
-    if (packet_stream_flush_packet(mud->packet_stream) < 0) {
-        goto register_fail;
-    }
-
-    int64_t session_id = packet_stream_get_long(mud->packet_stream);
-    mud->session_id = session_id;
-#endif
-
-    if (mud->session_id == 0) {
-        mudclient_show_login_screen_status(mud, "Login server offline.",
-                                           "Please try again in a few mins");
-        return;
-    }
-
-#ifdef REVISION_177
-    mud_log("Session id: %d\n", session_id);
-
-    packet_stream_new_packet(mud->packet_stream, CLIENT_REGISTER);
-    packet_stream_put_short(mud->packet_stream, VERSION);
-
-    packet_stream_put_long(mud->packet_stream,
-                           encode_username(formatted_username));
-
-    /* refer id */
-    packet_stream_put_short(mud->packet_stream, 0);
-
-    packet_stream_put_password(mud->packet_stream, session_id,
-                               formatted_password);
-
-    /* uid/randomDat */
-    packet_stream_put_int(mud->packet_stream, 0);
-
-    if (packet_stream_flush_packet(mud->packet_stream) < 0) {
-        goto register_fail;
-    }
-
-    packet_stream_get_byte(mud->packet_stream);
-#else
-    mud_log("Verb: Session id: %ld\n", session_id);
-
-    uint32_t keys[4] = {0};
-    keys[0] = (int)(((float)rand() / (float)RAND_MAX) * (float)99999999);
-    keys[1] = (int)(((float)rand() / (float)RAND_MAX) * (float)99999999);
-    keys[2] = (int32_t)(session_id >> 32);
-    keys[3] = (int32_t)(session_id);
-
-    packet_stream_new_packet(mud->packet_stream, CLIENT_REGISTER);
-    packet_stream_put_byte(mud->packet_stream, 0);
-    packet_stream_put_short(mud->packet_stream, VERSION);
-    packet_stream_put_byte(mud->packet_stream, 0); /* limit30 */
-
-    packet_stream_put_login_block(mud->packet_stream, formatted_username,
-                                  formatted_password, keys, 0);
-
-    if (packet_stream_flush_packet(mud->packet_stream) < 0) {
-        goto register_fail;
-    }
-#endif
-
-    int response = packet_stream_get_byte(mud->packet_stream);
-    mud_log("Newplayer response: %d\n", response);
-
-    switch (response) {
-    case 2:
-        mudclient_registration_login(mud);
-        return;
-    case 13:
-    case 3:
-        mudclient_show_login_screen_status(mud, "Username already taken.",
-                                           "Please choose another username");
-        return;
-    case 4:
-        mudclient_show_login_screen_status(mud,
-                                           "That username is already in use.",
-                                           "Wait 60 seconds then retry");
-        return;
-    case 5:
-        mudclient_show_login_screen_status(mud, "The client has been updated.",
-                                           "Please reload this page");
-        return;
-    case 6:
-        mudclient_show_login_screen_status(
-            mud, "You may only use 1 character at once.",
-            "Your ip-address is already in use");
-        return;
-    case 7:
-        mudclient_show_login_screen_status(mud, "Login attempts exceeded!",
-                                           "Please try again in 5 minutes");
-        return;
-    case 11:
-        mudclient_show_login_screen_status(
-            mud, "Account has been temporarily disabled",
-            "for cheating or abuse");
-        return;
-    case 12:
-        mudclient_show_login_screen_status(
-            mud, "Account has been permanently disabled",
-            "for cheating or abuse");
-        /* ^ this would be "Check your message inbox for details." */
-        return;
-    case 14:
-        mudclient_show_login_screen_status(
-            mud, "Sorry! The server is currently full.",
-            "Please try again later");
-
-        mud->world_full_timeout = 1500;
-        return;
-    case 15:
-        mudclient_show_login_screen_status(mud, "You need a members account",
-                                           "to login to this server");
-        return;
-    case 16:
-        mudclient_show_login_screen_status(mud,
-                                           "Please login to a members server",
-                                           "to access member-only features");
-        return;
-    default:
-        mudclient_show_login_screen_status(mud,
-                                           "Error unable to create username.",
-                                           "Unrecognised response code");
-        return;
-    }
-
-register_fail:
-    mudclient_show_login_screen_status(
-        mud, "Sorry! Unable to connect.",
-        "Check internet settings or try another world");
 }
 
 void mudclient_change_password(mudclient *mud, char *old_password,
@@ -2563,16 +1974,6 @@ void mudclient_start_game(mudclient *mud) {
 
     mudclient_draw_loading_progress(mud, 100, "Starting game...");
     mudclient_create_message_tabs_panel(mud);
-    mudclient_create_login_panels(mud);
-    mudclient_create_appearance_panel(mud);
-    mudclient_create_options_panel(mud);
-    mudclient_reset_login_screen(mud);
-
-    worldlist_new(mud);
-
-    if (!mud->options->lowmem) {
-        mudclient_render_login_scene_sprites(mud);
-    }
 
     free(surface_texture_pixels);
     surface_texture_pixels = NULL;
@@ -2775,8 +2176,6 @@ int mudclient_load_next_region(mudclient *mud, int lx, int ly) {
         mud->ground_items[i].y -= offset_y;
     }
 
-    mudclient_update_ground_item_models(mud);
-
     for (int i = 0; i < mud->player_count; i++) {
         GameCharacter *player = mud->players[i];
 
@@ -2961,31 +2360,6 @@ void mudclient_update_bank_items(mudclient *mud) {
             mud->bank_items_count[mud->bank_item_count] = 0;
             mud->bank_item_count++;
         }
-    }
-}
-
-void mudclient_close_connection(mudclient *mud) {
-    if (mud->packet_stream != NULL) {
-        packet_stream_new_packet(mud->packet_stream, CLIENT_CLOSE_CONNECTION);
-        packet_stream_flush_packet(mud->packet_stream);
-    }
-
-    memset(mud->username, '\0', USERNAME_LENGTH + 1);
-    memset(mud->password, '\0', PASSWORD_LENGTH + 1);
-
-    mudclient_reset_login_screen(mud);
-}
-
-void mudclient_lost_connection(mudclient *mud) {
-#ifndef REVISION_177
-    mud->system_update = 0;
-#endif
-
-    if (mud->logout_timeout != 0) {
-        mudclient_reset_login_screen(mud);
-    } else {
-        mud->auto_login_attempts = 10;
-        mudclient_login(mud, mud->username, mud->password, 1);
     }
 }
 
@@ -3181,9 +2555,8 @@ void mudclient_handle_game_input(mudclient *mud) {
         mud->local_player->current_y = ((mud->local_region_y) * MAGIC_LOC) + 64;
         mud->local_region_x = (mud->local_player->current_x - 64) / MAGIC_LOC;
         mud->local_region_y = (mud->local_player->current_y - 64) / MAGIC_LOC;
+        world_add_entities(mud);
     }
-
-    mudclient_packet_tick(mud);
 
     if (mud->logout_timeout > 0) {
         mud->logout_timeout--;
@@ -3203,11 +2576,6 @@ void mudclient_handle_game_input(mudclient *mud) {
 
     if (mud->combat_timeout > 0) {
         mud->combat_timeout--;
-    }
-
-    if (mud->show_appearance_change) {
-        mudclient_handle_appearance_panel_input(mud);
-        return;
     }
 
     for (int i = 0; i < mud->player_count; i++) {
@@ -3234,14 +2602,6 @@ void mudclient_handle_game_input(mudclient *mud) {
     }
 
     if (mud->show_ui_tab != MAP_TAB) {
-        if (an_int_346 > 0) {
-            mud->sleep_word_delay_timer++;
-        }
-
-        if (an_int_347 > 0) {
-            mud->sleep_word_delay_timer = 0;
-        }
-
         an_int_346 = 0;
         an_int_347 = 0;
     }
@@ -3309,16 +2669,6 @@ void mudclient_handle_game_input(mudclient *mud) {
 
         mud->camera_rotation += abs(mud->camera_momentum) * sign;
         mud->camera_momentum -= 1 * sign;
-    }
-
-    if (mud->sleep_word_delay_timer > 20) {
-        mud->sleep_word_delay = 0;
-        mud->sleep_word_delay_timer = 0;
-    }
-
-    if (mud->is_sleeping) {
-        mudclient_handle_sleep_input(mud);
-        return;
     }
 
     mudclient_handle_message_tabs_input(mud);
@@ -3486,7 +2836,6 @@ void mudclient_handle_inputs(mudclient *mud) {
 
     if (mud->logged_in == 0) {
         mud->mouse_action_timeout = 0;
-        mudclient_handle_login_screen_input(mud);
     } else if (mud->logged_in == 1) {
         mud->mouse_action_timeout++;
 
@@ -4122,52 +3471,8 @@ void mudclient_draw_ui(mudclient *mud) {
         if (mud->show_dialog_confirm) {
             mudclient_draw_confirm(mud);
         }
-    } else if (mud->show_dialog_confirm) {
-        mudclient_draw_confirm(mud);
-    } else if (mud->logout_timeout != 0) {
-        mudclient_draw_logout(mud);
-    } else if (mud->show_dialog_welcome) {
-        mudclient_draw_welcome(mud);
-    } else if (mud->show_dialog_server_message) {
-        mudclient_draw_server_message(mud);
     } else if (mud->show_wilderness_warning == 1) {
         mudclient_draw_wilderness_warning(mud);
-    } else if (mud->show_dialog_bank && mud->combat_timeout == 0) {
-        mudclient_draw_bank(mud);
-
-        if (mud->options->bank_menus) {
-            if (mud->show_right_click_menu) {
-                mudclient_draw_right_click_menu(mud);
-            } else {
-                mudclient_create_top_mouse_menu(mud);
-            }
-        }
-    } else if (mud->show_dialog_shop && mud->combat_timeout == 0) {
-        mudclient_draw_shop(mud);
-    } else if (mud->show_dialog_trade_confirm) {
-        mudclient_draw_trade_confirm(mud);
-    } else if (mud->show_dialog_trade) {
-        mudclient_draw_trade(mud);
-
-        if (mud->options->transaction_menus) {
-            if (mud->show_right_click_menu) {
-                mudclient_draw_right_click_menu(mud);
-            } else {
-                mudclient_create_top_mouse_menu(mud);
-            }
-        }
-    } else if (mud->show_dialog_duel_confirm) {
-        mudclient_draw_duel_confirm(mud);
-    } else if (mud->show_dialog_duel) {
-        mudclient_draw_duel(mud);
-
-        if (mud->options->transaction_menus) {
-            if (mud->show_right_click_menu) {
-                mudclient_draw_right_click_menu(mud);
-            } else {
-                mudclient_create_top_mouse_menu(mud);
-            }
-        }
     } else if (mud->show_change_password_step != 0) {
         mudclient_draw_change_password(mud);
     } else if (mud->show_dialog_social_input != 0) {
@@ -4554,16 +3859,6 @@ void mudclient_draw_game(mudclient *mud) {
         mudclient_draw_chat_message_tabs(mud);
 
         surface_draw(mud->surface);
-        return;
-    }
-
-    if (mud->show_appearance_change) {
-        mudclient_draw_appearance_panel(mud);
-        return;
-    }
-
-    if (mud->is_sleeping) {
-        mudclient_draw_sleep(mud);
         return;
     }
 
@@ -5063,11 +4358,6 @@ void mudclient_run(mudclient *mud) {
     while (mud->stop_timeout >= 0) {
         if (mud->stop_timeout > 0) {
             mud->stop_timeout--;
-
-            if (mud->stop_timeout == 0) {
-                mudclient_close_connection(mud);
-                return;
-            }
         }
 
         int k1 = j;

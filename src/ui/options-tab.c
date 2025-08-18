@@ -26,22 +26,7 @@ void mudclient_draw_change_password(mudclient *mud) {
 
     if (mud->mouse_button_click != 0) {
         mud->mouse_button_click = 0;
-
-        if (mud->mouse_x >= dialog_x &&
-            mud->mouse_x <= dialog_x + CHANGE_PASSWORD_WIDTH &&
-            mud->mouse_y >= y + 4 && mud->mouse_y <= y + 34 &&
-            (mud->show_change_password_step == PASSWORD_STEP_CURRENT ||
-             mud->show_change_password_step == PASSWORD_STEP_CONFIRM ||
-             mud->show_appearance_change == PASSWORD_STEP_NEW)) {
-            mudclient_trigger_keyboard(
-                mud, mud->input_text_current, 1, dialog_x - 2, y + 6,
-                CHANGE_PASSWORD_WIDTH, 30, FONT_BOLD_14, 1);
-        } else if (mud->mouse_x < dialog_x || mud->mouse_y < dialog_y ||
-                   mud->mouse_x > CHANGE_PASSWORD_WIDTH + dialog_x ||
-                   mud->mouse_y > CHANGE_PASSWORD_HEIGHT + dialog_y) {
-            mud->show_change_password_step = PASSWORD_STEP_NONE;
-            return;
-        }
+        return;
     }
 
     surface_draw_box(mud->surface, dialog_x, dialog_y, CHANGE_PASSWORD_WIDTH,
@@ -385,15 +370,7 @@ void mudclient_draw_ui_tab_options(mudclient *mud, int no_menus) {
 
             y += OPTIONS_LINE_BREAK;
 
-            char *location = "";
-
-            if (mud->refer_id == 0) {
-                location = "from the runescape.com front page";
-            } else if (mud->refer_id == 1) {
-                location = "from the link below the gamewindow";
-            } else {
-                location = "from the runescape front webpage";
-            }
+            char * location = "from the runescape front webpage";
 
             surface_draw_string(mud->surface, location, x, y, FONT_REGULAR_11,
                                 WHITE);
