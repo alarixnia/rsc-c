@@ -111,6 +111,10 @@ void mudclient_gl_update_wall_models(mudclient *mud) {
 void mudclient_packet_tick(mudclient *mud) {
     uint64_t timestamp = get_ticks();
 
+    if (mud->packet_stream == NULL) {
+        return;
+    }
+
     if (packet_stream_has_packet(mud->packet_stream)) {
         mud->packet_last_read = timestamp;
     }

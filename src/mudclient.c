@@ -4941,8 +4941,8 @@ void mudclient_draw(mudclient *mud) {
 #endif
 
     if (mud->logged_in == 0) {
-        mud->surface->draw_string_shadow = 0;
-        mudclient_draw_login_screens(mud);
+        mudclient_reset_game(mud);
+        mud->world->player_alive = true;
     } else if (mud->logged_in == 1) {
         mud->surface->draw_string_shadow = 1;
         mudclient_draw_game(mud);
