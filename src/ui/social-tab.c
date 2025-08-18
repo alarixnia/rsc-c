@@ -376,14 +376,7 @@ void mudclient_draw_ui_tab_social(mudclient *mud, int no_menus) {
     }
 
     if (mouse_y > 166 && mud->mouse_button_click == 1) {
-        memset(mud->input_text_current, '\0', INPUT_TEXT_LENGTH);
-        memset(mud->input_text_final, '\0', INPUT_TEXT_LENGTH);
-
-        if (mud->ui_tab_social_sub_tab == 0) {
-            mud->show_dialog_social_input = SOCIAL_ADD_FRIEND;
-        } else if (mud->ui_tab_social_sub_tab == 1) {
-            mud->show_dialog_social_input = SOCIAL_ADD_IGNORE;
-        }
+        mudclient_show_server_message(mud, "I can't do that, Jack");
     }
 
     mud->mouse_button_click = 0;

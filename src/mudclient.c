@@ -493,20 +493,20 @@ void mudclient_key_pressed(mudclient *mud, int code, int char_code) {
             }
         }
 
-	switch (char_code) {
-	    case 'w':
-		mud->local_player->current_y -= 25;
-		return;
-	    case 's':
-		mud->local_player->current_y += 25;
-		return;
-	    case 'a':
-		mud->local_player->current_x += 25;
-		return;
-	    case 'd':
-		mud->local_player->current_x -= 25;
-		return;
-	}
+        switch (char_code) {
+        case 'w':
+            mud->local_player->current_y -= 25;
+            return;
+        case 's':
+            mud->local_player->current_y += 25;
+            return;
+        case 'a':
+            mud->local_player->current_x += 25;
+            return;
+        case 'd':
+            mud->local_player->current_x -= 25;
+            return;
+        }
 
         mudclient_handle_key_press(mud, char_code);
     }
@@ -3297,6 +3297,17 @@ void mudclient_handle_game_input(mudclient *mud) {
         }
     }
 
+    bool loaded = mudclient_load_next_region(mud,
+        ((mud->local_player->current_x - 64) / MAGIC_LOC) + mud->region_x,
+        ((mud->local_player->current_y - 64) / MAGIC_LOC) + mud->region_y);
+
+    if (loaded) {
+        mud->local_player->current_x = ((mud->local_region_x) * MAGIC_LOC) + 64;
+        mud->local_player->current_y = ((mud->local_region_y) * MAGIC_LOC) + 64;
+        mud->local_region_x = (mud->local_player->current_x - 64) / MAGIC_LOC;
+        mud->local_region_y = (mud->local_player->current_y - 64) / MAGIC_LOC;
+    }
+
     mudclient_packet_tick(mud);
 
     if (mud->logout_timeout > 0) {
@@ -4960,7 +4971,15 @@ void mudclient_draw(mudclient *mud) {
     if (mud->logged_in == 0) {
         mudclient_reset_game(mud);
         mud->world->player_alive = true;
-        mudclient_load_next_region(mud, 50 * 48 + 23, 50 * 48 + 23);
+        mud->plane_width = 2304;
+        mud->plane_height = 1776;
+        mud->plane_multiplier = 944;
+        mud->plane_index = 0;
+        mudclient_load_next_region(mud, 128, 640);
+        mud->local_region_x = 128 - mud->region_x;
+        mud->local_region_y = 640 - mud->region_y;
+        mud->local_player->current_x = ((mud->local_region_x) * MAGIC_LOC) + 64;
+        mud->local_player->current_y = ((mud->local_region_y) * MAGIC_LOC) + 64;
     } else if (mud->logged_in == 1) {
         mud->surface->draw_string_shadow = 1;
         mudclient_draw_game(mud);
