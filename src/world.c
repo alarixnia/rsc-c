@@ -1578,7 +1578,7 @@ static void world_load_assemble(World *world, int x, int y, int plane,
         for (int r_y = 0; r_y < REGION_HEIGHT - 1; r_y++) {
             int wall = world_get_wall_east_west(world, r_x, r_y);
 
-            if (wall > 0 && game_data.wall_objects[wall - 1].interactive == 0) {
+            if (wall > 0) {
                 world_create_wall(world, world->parent_model, wall - 1, r_x,
                                   r_y, r_x + 1, r_y);
 
@@ -1599,7 +1599,7 @@ static void world_load_assemble(World *world, int x, int y, int plane,
 
             wall = world_get_wall_north_south(world, r_x, r_y);
 
-            if (wall > 0 && game_data.wall_objects[wall - 1].interactive == 0) {
+            if (wall > 0) {
                 world_create_wall(world, world->parent_model, wall - 1, r_x,
                                   r_y, r_x, r_y + 1);
 
@@ -1619,8 +1619,7 @@ static void world_load_assemble(World *world, int x, int y, int plane,
 
             wall = world_get_wall_diagonal(world, r_x, r_y);
 
-            if (wall > 0 && wall < 12000 &&
-                game_data.wall_objects[wall - 1].interactive == 0) {
+            if (wall > 0 && wall < 12000) {
                 world_create_wall(world, world->parent_model, wall - 1, r_x,
                                   r_y, r_x + 1, r_y + 1);
 
@@ -1638,8 +1637,7 @@ static void world_load_assemble(World *world, int x, int y, int plane,
                     world_map_set_pixel(world, r_x * 3 + 2, r_y * 3 + 2,
                                         colour);
                 }
-            } else if (wall > 12000 && wall < 24000 &&
-                       game_data.wall_objects[wall - 12001].interactive == 0) {
+            } else if (wall > 12000 && wall < 24000) {
                 world_create_wall(world, world->parent_model, wall - 12001,
                                   r_x + 1, r_y, r_x, r_y + 1);
 
