@@ -3589,8 +3589,6 @@ void mudclient_draw_ui(mudclient *mud) {
         }
     } else if (mud->show_wilderness_warning == 1) {
         mudclient_draw_wilderness_warning(mud);
-    } else if (mud->show_change_password_step != 0) {
-        mudclient_draw_change_password(mud);
     } else if (mud->show_dialog_social_input != 0) {
         mudclient_draw_social_input(mud);
     } else {

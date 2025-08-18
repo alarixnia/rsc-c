@@ -2,151 +2,7 @@
 #include "options-tab.h"
 
 static bool sound_visible(mudclient *mud) {
-    return mud->options->members && !mud->options->lowmem;
-}
-
-void mudclient_send_privacy_settings(mudclient *mud, int chat, int private_chat,
-                                     int trade, int duel) {
-    packet_stream_new_packet(mud->packet_stream, CLIENT_SETTINGS_PRIVACY);
-    packet_stream_put_byte(mud->packet_stream, chat);
-    packet_stream_put_byte(mud->packet_stream, private_chat);
-    packet_stream_put_byte(mud->packet_stream, trade);
-    packet_stream_put_byte(mud->packet_stream, duel);
-    packet_stream_send_packet(mud->packet_stream);
-}
-
-void mudclient_draw_change_password(mudclient *mud) {
-    int dialog_x = (mud->surface->width / 2) - (CHANGE_PASSWORD_WIDTH / 2);
-
-    int dialog_y =
-        (mud->surface->height / 2) - (CHANGE_PASSWORD_HEIGHT / 2) + 7;
-
-    int x = mud->surface->width / 2;
-    int y = dialog_y + 22;
-
-    if (mud->mouse_button_click != 0) {
-        mud->mouse_button_click = 0;
-        return;
-    }
-
-    surface_draw_box(mud->surface, dialog_x, dialog_y, CHANGE_PASSWORD_WIDTH,
-                     CHANGE_PASSWORD_HEIGHT, BLACK);
-
-    surface_draw_border(mud->surface, dialog_x, dialog_y, CHANGE_PASSWORD_WIDTH,
-                        CHANGE_PASSWORD_HEIGHT, WHITE);
-
-    char password_input[PASSWORD_LENGTH + 2] = {0};
-
-    if (mud->show_change_password_step == PASSWORD_STEP_CURRENT) {
-        surface_draw_string_centre(mud->surface,
-                                   "Please enter your current password", x, y,
-                                   FONT_BOLD_14, WHITE);
-
-        y += 25;
-
-        size_t current_length = strlen(mud->input_text_current);
-
-        for (size_t i = 0; i < current_length; i++) {
-            password_input[i] = 'X';
-        }
-
-        password_input[current_length] = '*';
-
-        surface_draw_string_centre(mud->surface, password_input, x, y,
-                                   FONT_BOLD_14, WHITE);
-
-        if (strlen(mud->input_text_final) > 0) {
-            strcpy(mud->change_password_old, mud->input_text_final);
-            memset(mud->input_text_current, '\0', INPUT_TEXT_LENGTH + 1);
-            memset(mud->input_text_final, '\0', INPUT_TEXT_LENGTH + 1);
-            mud->show_change_password_step = 1;
-        }
-    } else if (mud->show_change_password_step == PASSWORD_STEP_NEW) {
-        surface_draw_string_centre(mud->surface,
-                                   "Please enter your new password", x, y,
-                                   FONT_BOLD_14, WHITE);
-
-        y += 25;
-
-        size_t current_length = strlen(mud->input_text_current);
-
-        for (size_t i = 0; i < current_length; i++) {
-            password_input[i] = 'X';
-        }
-
-        password_input[current_length] = '*';
-
-        surface_draw_string_centre(mud->surface, password_input, x, y,
-                                   FONT_BOLD_14, WHITE);
-
-        if (strlen(mud->input_text_final) > 0) {
-            strcpy(mud->change_password_new, mud->input_text_final);
-            memset(mud->input_text_current, '\0', INPUT_TEXT_LENGTH + 1);
-            memset(mud->input_text_final, '\0', INPUT_TEXT_LENGTH + 1);
-
-            if (strlen(mud->change_password_new) >= 5) {
-                mud->show_change_password_step = PASSWORD_STEP_CONFIRM;
-            } else {
-                mud->show_change_password_step = PASSWORD_STEP_SHORT;
-            }
-        }
-    } else if (mud->show_change_password_step == PASSWORD_STEP_CONFIRM) {
-        surface_draw_string_centre(mud->surface,
-                                   "Enter password again to confirm", x, y,
-                                   FONT_BOLD_14, WHITE);
-
-        y += 25;
-
-        size_t current_length = strlen(mud->input_text_current);
-
-        for (size_t i = 0; i < current_length; i++) {
-            password_input[i] = 'X';
-        }
-
-        password_input[current_length] = '*';
-
-        surface_draw_string_centre(mud->surface, password_input, x, y,
-                                   FONT_BOLD_14, WHITE);
-
-        if (strlen(mud->input_text_final) > 0) {
-            if (strcasecmp(mud->input_text_final, mud->change_password_new) ==
-                0) {
-                mud->show_change_password_step = PASSWORD_STEP_FINISHED;
-
-                mudclient_change_password(mud, mud->change_password_old,
-                                          mud->change_password_new);
-            } else {
-                mud->show_change_password_step = PASSWORD_STEP_MISMATCH;
-            }
-        }
-    } else {
-        if (mud->show_change_password_step == PASSWORD_STEP_MISMATCH) {
-            surface_draw_string_centre(mud->surface, "Passwords do not match!",
-                                       x, y, FONT_BOLD_14, WHITE);
-
-            y += 25;
-
-            surface_draw_string_centre(mud->surface, "Press any key to close",
-                                       x, y, FONT_BOLD_14, WHITE);
-        } else if (mud->show_change_password_step == PASSWORD_STEP_FINISHED) {
-            surface_draw_string_centre(mud->surface,
-                                       "Ok, your request has been sent", x, y,
-                                       FONT_BOLD_14, WHITE);
-
-            y += 25;
-
-            surface_draw_string_centre(mud->surface, "Press any key to close",
-                                       x, y, FONT_BOLD_14, WHITE);
-        } else if (mud->show_change_password_step == 5) {
-            surface_draw_string_centre(mud->surface, "Password must be at", x,
-                                       y, FONT_BOLD_14, WHITE);
-
-            y += 25;
-
-            surface_draw_string_centre(mud->surface, "least 5 letters long", x,
-                                       y, FONT_BOLD_14, WHITE);
-        }
-    }
+    return false;
 }
 
 void mudclient_draw_ui_tab_options(mudclient *mud, int no_menus) {
@@ -373,13 +229,6 @@ void mudclient_draw_ui_tab_options(mudclient *mud, int no_menus) {
             mud->mouse_y > y - 12 && mud->mouse_y < y + 4 &&
             mud->mouse_button_click == 1) {
             mud->settings_camera_auto = !mud->settings_camera_auto;
-            packet_stream_new_packet(mud->packet_stream, CLIENT_SETTINGS_GAME);
-            packet_stream_put_byte(mud->packet_stream, 0);
-
-            packet_stream_put_byte(mud->packet_stream,
-                                   mud->settings_camera_auto ? 1 : 0);
-
-            packet_stream_send_packet(mud->packet_stream);
         }
 
         y += OPTIONS_LINE_BREAK;
@@ -388,13 +237,6 @@ void mudclient_draw_ui_tab_options(mudclient *mud, int no_menus) {
             mud->mouse_y > y - 12 && mud->mouse_y < y + 4 &&
             mud->mouse_button_click == 1) {
             mud->settings_mouse_button_one = !mud->settings_mouse_button_one;
-            packet_stream_new_packet(mud->packet_stream, CLIENT_SETTINGS_GAME);
-            packet_stream_put_byte(mud->packet_stream, 2);
-
-            packet_stream_put_byte(mud->packet_stream,
-                                   mud->settings_mouse_button_one ? 1 : 0);
-
-            packet_stream_send_packet(mud->packet_stream);
         }
 
         y += OPTIONS_LINE_BREAK;
