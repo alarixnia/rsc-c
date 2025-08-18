@@ -159,14 +159,47 @@ void mudclient_new(mudclient *mud) {
 }
 
 void world_add_entities(mudclient *mud) {
+    int server_index = 0;
+
+    mud->ground_item_count = 0;
+
     for (int x = 0; x < 94; x++) {
         for (int y = 0; y < 94; y++) {
             int diagonal = world_get_wall_diagonal(mud->world, x, y);
             if (diagonal >= 24000 && diagonal <= 36000) {
-                mudclient_add_npc(mud, 0,
-                    ((x + mud->region_x) * MAGIC_LOC) + 64,
-                    ((y + mud->region_x) * MAGIC_LOC) + 64,
-                    0, diagonal - 24000);
+                mudclient_add_npc(mud, server_index++,
+                    (x * MAGIC_LOC) + 64,
+                    (y * MAGIC_LOC) + 64,
+                    0, diagonal - 24000 - 1);
+            } else if (diagonal >= 36000 && diagonal <= 48000) {
+                int item_id = diagonal - 36000 - 1;
+
+                if (item_id >= game_data.item_count) {
+                    item_id = IRON_MACE_ID;
+                }
+
+                if (mud->ground_item_count >= GROUND_ITEMS_MAX) {
+                    return;
+                }
+
+                mud->ground_items[mud->ground_item_count].x = x;
+                mud->ground_items[mud->ground_item_count].y = y;
+                mud->ground_items[mud->ground_item_count].id = item_id;
+                mud->ground_items[mud->ground_item_count].z = 0;
+
+                for (int i = 0; i < mud->object_count; i++) {
+                    if (mud->objects[i].x != x||
+                        mud->objects[i].y != y) {
+                        continue;
+                    }
+
+                    mud->ground_items[mud->ground_item_count].z =
+                        game_data.objects[mud->objects[i].id].elevation;
+
+                    break;
+                }
+
+                mud->ground_item_count++;
             }
         }
     }
@@ -400,16 +433,16 @@ void mudclient_key_pressed(mudclient *mud, int code, int char_code) {
 
         switch (char_code) {
         case 'w':
-            mud->local_player->current_y -= 25;
+            mud->local_player->current_y -= 128;
             return;
         case 's':
-            mud->local_player->current_y += 25;
+            mud->local_player->current_y += 128;
             return;
         case 'a':
-            mud->local_player->current_x += 25;
+            mud->local_player->current_x += 128;
             return;
         case 'd':
-            mud->local_player->current_x -= 25;
+            mud->local_player->current_x -= 128;
             return;
         }
     }
@@ -4150,6 +4183,7 @@ void mudclient_draw(mudclient *mud) {
         mud->local_region_y = 640 - mud->region_y;
         mud->local_player->current_x = ((mud->local_region_x) * MAGIC_LOC) + 64;
         mud->local_player->current_y = ((mud->local_region_y) * MAGIC_LOC) + 64;
+        world_add_entities(mud);
     } else if (mud->logged_in == 1) {
         mud->surface->draw_string_shadow = 1;
         mudclient_draw_game(mud);
