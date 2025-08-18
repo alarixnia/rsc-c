@@ -230,22 +230,6 @@ void mudclient_draw_ui_tab_options(mudclient *mud, int no_menus) {
         privacy_box_height += OPTIONS_LINE_BREAK - 4;
     }
 
-    surface_draw_box_alpha(mud->surface, ui_x,
-                           ui_y + security_box_height + controls_box_height,
-                           OPTIONS_WIDTH, privacy_box_height, GREY_B5, 160);
-
-    int hide_logout_label = (is_touch && show_skip_tutorial);
-    int logout_box_height = is_compact ? 29 : 40;
-
-    if (!hide_logout_label && show_skip_tutorial) {
-        logout_box_height += OPTIONS_LINE_BREAK;
-    }
-
-    surface_draw_box_alpha(mud->surface, ui_x,
-                           ui_y + privacy_box_height + security_box_height +
-                               controls_box_height,
-                           OPTIONS_WIDTH, logout_box_height, GREY_C9, 160);
-
     int x = ui_x + 3;
     int y = ui_y + OPTIONS_LINE_BREAK;
 
@@ -281,16 +265,6 @@ void mudclient_draw_ui_tab_options(mudclient *mud, int no_menus) {
 
     y += OPTIONS_LINE_BREAK;
 
-    if (sound_visible(mud)) {
-        sprintf(settings_string, "Sound effects - %s",
-                (mud->settings_sound_disabled ? "@red@off" : "@gre@on"));
-
-        surface_draw_string(mud->surface, settings_string, x, y, FONT_BOLD_12,
-                            WHITE);
-
-        y += OPTIONS_LINE_BREAK;
-    }
-
     if (mud->options->show_additional_options) {
         int text_colour = WHITE;
 
@@ -307,7 +281,7 @@ void mudclient_draw_ui_tab_options(mudclient *mud, int no_menus) {
         y += OPTIONS_LINE_BREAK;
     }
 
-    if (mud->options->account_management) {
+    if (0) {
         if (!is_compact) {
             y += 5;
 
@@ -352,125 +326,34 @@ void mudclient_draw_ui_tab_options(mudclient *mud, int no_menus) {
             y += OPTIONS_LINE_BREAK * 2;
         }
     } else {
-        if (!is_compact) {
-            surface_draw_string(mud->surface, "To change your contact details,",
-                                x, y, FONT_REGULAR_11, WHITE);
+        y += 3;
 
-            y += OPTIONS_LINE_BREAK;
-
-            surface_draw_string(mud->surface,
-                                "password, recovery questions, etc..", x, y,
-                                FONT_REGULAR_11, WHITE);
-
-            y += OPTIONS_LINE_BREAK;
-
-            surface_draw_string(mud->surface,
-                                "Please select 'account management'", x, y,
-                                FONT_REGULAR_11, WHITE);
-
-            y += OPTIONS_LINE_BREAK;
-
-            char * location = "from the runescape front webpage";
-
-            surface_draw_string(mud->surface, location, x, y, FONT_REGULAR_11,
-                                WHITE);
-
-            y += OPTIONS_LINE_BREAK + 5;
-        } else {
-            y += OPTIONS_LINE_BREAK;
-        }
-    }
-
-    if (!is_compact) {
-        surface_draw_string(mud->surface,
-                            "Privacy settings. Will be applied to", x, y,
-                            FONT_BOLD_12, BLACK);
-
+        surface_draw_string(mud->surface, "Map viewer commands", x,
+                            y, FONT_BOLD_12, BLACK);
         y += OPTIONS_LINE_BREAK;
 
-        surface_draw_string(mud->surface, "all people not on your friends list",
-                            x, y, FONT_BOLD_12, BLACK);
+        int text_colour = WHITE;
 
-        y += OPTIONS_LINE_BREAK;
-    }
-
-    if (is_touch) {
-        y -= 1;
-
-        surface_draw_string(mud->surface, "Privacy settings", ui_x + 3, y,
-                            FONT_BOLD_12, BLACK);
-
-        y += OPTIONS_LINE_BREAK - 3;
-    }
-
-    sprintf(settings_string, "Block chat messages: %s",
-            (!mud->settings_block_chat ? "@red@<off>" : "@gre@<on>"));
-
-    surface_draw_string(mud->surface, settings_string, ui_x + 3, y,
-                        FONT_BOLD_12, WHITE);
-
-    y += OPTIONS_LINE_BREAK;
-
-    sprintf(settings_string, "Block private messages: %s",
-            (!mud->settings_block_private ? "@red@<off>" : "@gre@<on>"));
-
-    surface_draw_string(mud->surface, settings_string, ui_x + 3, y,
-                        FONT_BOLD_12, WHITE);
-
-    y += OPTIONS_LINE_BREAK;
-
-    sprintf(settings_string, "Block trade requests: %s",
-            (!mud->settings_block_trade ? "@red@<off>" : "@gre@<on>"));
-
-    surface_draw_string(mud->surface, settings_string, ui_x + 3, y,
-                        FONT_BOLD_12, WHITE);
-
-    y += OPTIONS_LINE_BREAK;
-
-    if (mud->options->members) {
-        sprintf(settings_string, "Block duel requests: %s",
-                (!mud->settings_block_duel ? "@red@<off>" : "@gre@<on>"));
-
-        surface_draw_string(mud->surface, settings_string, ui_x + 3, y,
-                            FONT_BOLD_12, WHITE);
-    }
-
-    y += OPTIONS_LINE_BREAK + (is_compact ? 0 : 5);
-
-    int text_colour = WHITE;
-
-    if (show_skip_tutorial) {
         if (mud->mouse_x > x && mud->mouse_x < x + OPTIONS_WIDTH &&
             mud->mouse_y > y - 12 && mud->mouse_y < y + 4) {
             text_colour = YELLOW;
         }
 
-        surface_draw_string(mud->surface, "Skip the tutorial", x, y,
-                            FONT_BOLD_12, text_colour);
+        surface_draw_string(mud->surface, "Go up level...", x, y,
+            FONT_BOLD_12, text_colour);
+        y += OPTIONS_LINE_BREAK;
 
-        if (is_compact) {
-            y += OPTIONS_LINE_BREAK - 1;
-        } else {
-            y += OPTIONS_LINE_BREAK + 5;
+        text_colour = WHITE;
+
+        if (mud->mouse_x > x && mud->mouse_x < x + OPTIONS_WIDTH &&
+            mud->mouse_y > y - 12 && mud->mouse_y < y + 4) {
+                text_colour = YELLOW;
         }
+
+        surface_draw_string(mud->surface, "Go down level...", x, y,
+            FONT_BOLD_12, text_colour);
+        y += OPTIONS_LINE_BREAK;
     }
-
-    if (!hide_logout_label) {
-        surface_draw_string(mud->surface, "Always logout when you finish", x, y,
-                            FONT_BOLD_12, BLACK);
-
-        y += OPTIONS_LINE_BREAK - (is_compact ? 2 : 0);
-    }
-
-    text_colour = WHITE;
-
-    if (mud->mouse_x > x && mud->mouse_x < x + OPTIONS_WIDTH &&
-        mud->mouse_y > y - 12 && mud->mouse_y < y + 4) {
-        text_colour = YELLOW;
-    }
-
-    surface_draw_string(mud->surface, "Click here to logout", ui_x + 3, y,
-                        FONT_BOLD_12, text_colour);
 
     if (!no_menus) {
         return;
@@ -539,119 +422,6 @@ void mudclient_draw_ui_tab_options(mudclient *mud, int no_menus) {
                 mud->mouse_button_click == 1) {
                 mud->show_additional_options = 1;
             }
-        }
-
-        if (mud->options->show_additional_options || !sound_visible(mud)) {
-            y += OPTIONS_LINE_BREAK;
-        }
-
-        if (!is_compact) {
-            y += OPTIONS_LINE_BREAK + 5;
-        } else if (is_touch) {
-            y += OPTIONS_LINE_BREAK - 4;
-        }
-
-        if (mud->options->account_management) {
-            if (mud->mouse_x > x && mud->mouse_x < x + OPTIONS_WIDTH &&
-                mud->mouse_y > y - 12 && mud->mouse_y < y + 4 &&
-                mud->mouse_button_click == 1) {
-                mud->show_change_password_step = PASSWORD_STEP_CURRENT;
-                mud->input_text_current[0] = '\0';
-                mud->input_text_final[0] = '\0';
-            }
-
-            /*if (mud->mouse_x > x && mud->mouse_x < x + OPTIONS_WIDTH &&
-                mud->mouse_y > y - 12 && mud->mouse_y < y + 4 &&
-                mud->mouse_button_click == 1) {
-                packet_stream_new_packet(mud->packet_stream,
-                                         CLIENT_RECOVER_SET_REQUEST);
-
-                packet_stream_send_packet(mud->packet_stream);
-            }*/
-        }
-
-        int has_changed_setting = 0;
-
-        if (!is_compact) {
-            y += OPTIONS_LINE_BREAK * 5;
-        } else {
-            y += OPTIONS_LINE_BREAK;
-        }
-
-        if (is_touch) {
-            y += OPTIONS_LINE_BREAK - 4;
-        }
-
-        if (mud->mouse_x > x && mud->mouse_x < x + OPTIONS_WIDTH &&
-            mud->mouse_y > y - 12 && mud->mouse_y < y + 4 &&
-            mud->mouse_button_click == 1) {
-            mud->settings_block_chat = 1 - mud->settings_block_chat;
-            has_changed_setting = 1;
-        }
-
-        y += OPTIONS_LINE_BREAK;
-
-        if (mud->mouse_x > x && mud->mouse_x < x + OPTIONS_WIDTH &&
-            mud->mouse_y > y - 12 && mud->mouse_y < y + 4 &&
-            mud->mouse_button_click == 1) {
-            mud->settings_block_private = 1 - mud->settings_block_private;
-            has_changed_setting = 1;
-        }
-
-        y += OPTIONS_LINE_BREAK;
-
-        if (mud->mouse_x > x && mud->mouse_x < x + OPTIONS_WIDTH &&
-            mud->mouse_y > y - 12 && mud->mouse_y < y + 4 &&
-            mud->mouse_button_click == 1) {
-            mud->settings_block_trade = 1 - mud->settings_block_trade;
-            has_changed_setting = 1;
-        }
-
-        y += OPTIONS_LINE_BREAK;
-
-        if (mud->options->members && mud->mouse_x > x &&
-            mud->mouse_x < x + OPTIONS_WIDTH && mud->mouse_y > y - 12 &&
-            mud->mouse_y < y + 4 && mud->mouse_button_click == 1) {
-            mud->settings_block_duel = 1 - mud->settings_block_duel;
-            has_changed_setting = 1;
-        }
-
-        if (has_changed_setting) {
-            mudclient_send_privacy_settings(
-                mud, mud->settings_block_chat, mud->settings_block_private,
-                mud->settings_block_trade, mud->settings_block_duel);
-        }
-
-        y += OPTIONS_LINE_BREAK + (is_compact ? 0 : 5);
-
-        if (show_skip_tutorial) {
-            if (mud->mouse_x > x && mud->mouse_x < x + OPTIONS_WIDTH &&
-                mud->mouse_y > y - 12 && mud->mouse_y < y + 4 &&
-                mud->mouse_button_click == 1) {
-                mud->confirm_text_top =
-                    "Are you sure you wish to skip the tutorial";
-
-                mud->confirm_text_bottom = "and teleport to Lumbridge?";
-
-                mud->confirm_type = CONFIRM_TUTORIAL;
-                mud->show_dialog_confirm = 1;
-            }
-
-            if (is_compact) {
-                y += OPTIONS_LINE_BREAK - 1;
-            } else {
-                y += OPTIONS_LINE_BREAK + 5;
-            }
-        }
-
-        if (!hide_logout_label) {
-            y += OPTIONS_LINE_BREAK - (is_compact ? 2 : 0);
-        }
-
-        if (mud->mouse_x > x && mud->mouse_x < x + OPTIONS_WIDTH &&
-            mud->mouse_y > y - 12 && mud->mouse_y < y + 4 &&
-            mud->mouse_button_click == 1) {
-            mudclient_send_logout(mud);
         }
 
         mud->mouse_button_click = 0;
