@@ -1074,6 +1074,7 @@ void mudclient_format_item_amount(mudclient *mud, int item_amount, char *dest);
 int mudclient_get_wilderness_depth(mudclient *mud);
 void mudclient_go_up(mudclient *mud);
 void mudclient_go_down(mudclient *mud);
+void mudclient_teleport(mudclient *mud, int x, int y);
 void mudclient_draw_item(mudclient *mud, int x, int y, int slot_width,
                          int slot_height, int item_id);
 int main(int argc, char **argv);

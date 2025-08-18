@@ -58,7 +58,7 @@ EM_JS(void, browser_trigger_keyboard,
           keyboard.focus();
       });
 
-EM_JS(int, browser_is_touch, (), { return window._mudclientIsTouch; });
+EM_JS(int, browser_is_touch, (), { return false; });
 /* clang-format on */
 
 int last_canvas_check = 0;
@@ -4237,14 +4237,15 @@ void mudclient_draw(mudclient *mud) {
 
     if (mud->logged_in == 0) {
         mudclient_reset_game(mud);
+        mudclient_create_options_panel(mud);
         mud->world->player_alive = true;
         mud->plane_width = 2304;
         mud->plane_height = 1776;
         mud->plane_multiplier = 944;
         mud->plane_index = 0;
-        mudclient_load_next_region(mud, 128, 640);
+        mudclient_load_next_region(mud, 128, 648);
         mud->local_region_x = 128 - mud->region_x;
-        mud->local_region_y = 640 - mud->region_y;
+        mud->local_region_y = 648 - mud->region_y;
         mud->local_player->current_x = ((mud->local_region_x) * MAGIC_LOC) + 64;
         mud->local_player->current_y = ((mud->local_region_y) * MAGIC_LOC) + 64;
         world_add_entities(mud);
@@ -4965,4 +4966,15 @@ void mudclient_go_down(mudclient *mud) {
         mud->plane_height = 1776 - (mud->plane_index * mud->plane_multiplier);
         mud->region_y += (3 * mud->plane_multiplier);
     }
+}
+
+void mudclient_teleport(mudclient *mud, int x, int y) {
+    mud->plane_index = 0;
+    mud->plane_height = 1776 - (mud->plane_index * mud->plane_multiplier);
+    mudclient_load_next_region(mud, x, y);
+    mud->local_region_x = x - mud->region_x;
+    mud->local_region_y = y - mud->region_y;
+    mud->local_player->current_x = ((mud->local_region_x) * MAGIC_LOC) + 64;
+    mud->local_player->current_y = ((mud->local_region_y) * MAGIC_LOC) + 64;
+    world_add_entities(mud);
 }

@@ -71,7 +71,7 @@ void mudclient_draw_ui_tab_options(mudclient *mud, int no_menus) {
     surface_draw_box_alpha(mud->surface, ui_x, ui_y, OPTIONS_WIDTH,
                            controls_box_height, GREY_B5, 160);
 
-    int security_box_height = is_compact ? 15 : 65;
+    int security_box_height = 130;
 
     if (is_touch) {
         security_box_height += OPTIONS_LINE_BREAK - 4;
@@ -79,12 +79,6 @@ void mudclient_draw_ui_tab_options(mudclient *mud, int no_menus) {
 
     surface_draw_box_alpha(mud->surface, ui_x, ui_y + controls_box_height,
                            OPTIONS_WIDTH, security_box_height, GREY_C9, 160);
-
-    int privacy_box_height = is_compact ? 60 : 95;
-
-    if (is_touch) {
-        privacy_box_height += OPTIONS_LINE_BREAK - 4;
-    }
 
     int x = ui_x + 3;
     int y = ui_y + OPTIONS_LINE_BREAK;
@@ -209,6 +203,61 @@ void mudclient_draw_ui_tab_options(mudclient *mud, int no_menus) {
         surface_draw_string(mud->surface, "Go down level...", x, y,
             FONT_BOLD_12, text_colour);
         y += OPTIONS_LINE_BREAK;
+
+        text_colour = WHITE;
+
+        if (mud->mouse_x > x && mud->mouse_x < x + OPTIONS_WIDTH &&
+            mud->mouse_y > y - 12 && mud->mouse_y < y + 4) {
+                text_colour = YELLOW;
+        }
+
+        surface_draw_string(mud->surface, "Teleport to Varrock...", x, y,
+            FONT_BOLD_12, text_colour);
+        y += OPTIONS_LINE_BREAK;
+
+        text_colour = WHITE;
+
+        if (mud->mouse_x > x && mud->mouse_x < x + OPTIONS_WIDTH &&
+            mud->mouse_y > y - 12 && mud->mouse_y < y + 4) {
+                text_colour = YELLOW;
+        }
+
+        surface_draw_string(mud->surface, "Teleport to Lumbridge...", x, y,
+            FONT_BOLD_12, text_colour);
+        y += OPTIONS_LINE_BREAK;
+
+        text_colour = WHITE;
+
+        if (mud->mouse_x > x && mud->mouse_x < x + OPTIONS_WIDTH &&
+            mud->mouse_y > y - 12 && mud->mouse_y < y + 4) {
+                text_colour = YELLOW;
+        }
+
+        surface_draw_string(mud->surface, "Teleport to Falador...", x, y,
+            FONT_BOLD_12, text_colour);
+        y += OPTIONS_LINE_BREAK;
+
+        text_colour = WHITE;
+
+        if (mud->mouse_x > x && mud->mouse_x < x + OPTIONS_WIDTH &&
+            mud->mouse_y > y - 12 && mud->mouse_y < y + 4) {
+                text_colour = YELLOW;
+        }
+
+        surface_draw_string(mud->surface, "Teleport to Karamja...", x, y,
+            FONT_BOLD_12, text_colour);
+        y += OPTIONS_LINE_BREAK;
+
+        text_colour = WHITE;
+
+        if (mud->mouse_x > x && mud->mouse_x < x + OPTIONS_WIDTH &&
+            mud->mouse_y > y - 12 && mud->mouse_y < y + 4) {
+                text_colour = YELLOW;
+        }
+
+        surface_draw_string(mud->surface, "Teleport to Camelot...", x, y,
+            FONT_BOLD_12, text_colour);
+        y += OPTIONS_LINE_BREAK;
     }
 
     if (!no_menus) {
@@ -263,6 +312,46 @@ void mudclient_draw_ui_tab_options(mudclient *mud, int no_menus) {
             mud->mouse_y > y - 12 && mud->mouse_y < y + 4 &&
             mud->mouse_button_click == 1) {
             mudclient_go_down(mud);
+        }
+
+        y += OPTIONS_LINE_BREAK;
+
+        if (mud->mouse_x > x && mud->mouse_x < x + OPTIONS_WIDTH &&
+            mud->mouse_y > y - 12 && mud->mouse_y < y + 4 &&
+            mud->mouse_button_click == 1) {
+            mudclient_teleport(mud, 120, 504);
+        }
+
+        y += OPTIONS_LINE_BREAK;
+
+        if (mud->mouse_x > x && mud->mouse_x < x + OPTIONS_WIDTH &&
+            mud->mouse_y > y - 12 && mud->mouse_y < y + 4 &&
+            mud->mouse_button_click == 1) {
+            mudclient_teleport(mud, 120, 648);
+        }
+
+        y += OPTIONS_LINE_BREAK;
+
+        if (mud->mouse_x > x && mud->mouse_x < x + OPTIONS_WIDTH &&
+            mud->mouse_y > y - 12 && mud->mouse_y < y + 4 &&
+            mud->mouse_button_click == 1) {
+            mudclient_teleport(mud, 312, 552);
+        }
+
+        y += OPTIONS_LINE_BREAK;
+
+        if (mud->mouse_x > x && mud->mouse_x < x + OPTIONS_WIDTH &&
+            mud->mouse_y > y - 12 && mud->mouse_y < y + 4 &&
+            mud->mouse_button_click == 1) {
+            mudclient_teleport(mud, 360, 696);
+        }
+
+        y += OPTIONS_LINE_BREAK;
+
+        if (mud->mouse_x > x && mud->mouse_x < x + OPTIONS_WIDTH &&
+            mud->mouse_y > y - 12 && mud->mouse_y < y + 4 &&
+            mud->mouse_button_click == 1) {
+            mudclient_teleport(mud, 456, 456);
         }
 
         mud->mouse_button_click = 0;
