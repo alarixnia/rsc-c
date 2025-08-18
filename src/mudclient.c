@@ -507,131 +507,6 @@ void mudclient_key_pressed(mudclient *mud, int code, int char_code) {
             mud->local_player->current_x -= 25;
             return;
         }
-
-        mudclient_handle_key_press(mud, char_code);
-    }
-
-    int found_text = 0;
-
-    for (int i = 0; i < CHAR_SET_LENGTH; i++) {
-        if (CHAR_SET[i] == char_code) {
-            found_text = 1;
-            break;
-        }
-    }
-
-    int should_append_pm = (mud->show_dialog_bank ? mud->bank_search_focus : 1);
-
-    if (found_text) {
-        if (!mud->show_dialog_offer_x) {
-            size_t current_length = strlen(mud->input_text_current);
-
-            if (current_length < INPUT_TEXT_LENGTH) {
-                mud->input_text_current[current_length] = char_code;
-                mud->input_text_current[current_length + 1] = '\0';
-            }
-
-            size_t pm_length = strlen(mud->input_pm_current);
-
-            if (pm_length < INPUT_PM_LENGTH && should_append_pm) {
-                mud->input_pm_current[pm_length] = char_code;
-                mud->input_pm_current[pm_length + 1] = '\0';
-            }
-        } else if ((IS_DIGIT_SEPARATOR(char_code) ||
-                    IS_DIGIT_SUFFIX(char_code) ||
-                    isdigit((unsigned char)char_code))) {
-            size_t digits_length = strlen(mud->input_digits_current);
-
-            if (digits_length < INPUT_DIGITS_LENGTH) {
-                int add_digit_char = 1;
-
-                if (digits_length > 0) {
-                    int last_digit_char =
-                        mud->input_digits_current[digits_length - 1];
-
-                    /* only one suffix */
-                    if (IS_DIGIT_SUFFIX(last_digit_char)) {
-                        add_digit_char = 0;
-                    } else {
-                        /* don't allow consecutive decimals or separators */
-                        add_digit_char = !(IS_DIGIT_SEPARATOR(char_code) &&
-                                           IS_DIGIT_SEPARATOR(last_digit_char));
-                    }
-                } else {
-                    /* don't allow separators or suffixes as first characters */
-                    add_digit_char = !IS_DIGIT_SUFFIX(char_code) &&
-                                     !IS_DIGIT_SEPARATOR(char_code);
-                }
-
-                if (add_digit_char) {
-                    mud->input_digits_current[digits_length] = char_code;
-                    mud->input_digits_current[digits_length + 1] = '\0';
-                }
-            }
-        }
-    }
-
-    if (code == K_ENTER) {
-        strcpy(mud->input_text_final, mud->input_text_current);
-
-        if (should_append_pm) {
-            strcpy(mud->input_pm_final, mud->input_pm_current);
-        }
-
-        if (mud->options->offer_x) {
-            char filtered_digits[INPUT_DIGITS_LENGTH + 1] = {0};
-            int filtered_length = 0;
-            char digits_suffix = '\0';
-            int has_decimal = 0;
-            size_t digits_length = strlen(mud->input_digits_current);
-
-            for (size_t i = 0; i < digits_length; i++) {
-                char digit_char = mud->input_digits_current[i];
-
-                if (isdigit((unsigned char)digit_char)) {
-                    filtered_digits[filtered_length++] = digit_char;
-                } else if (tolower((unsigned char)digit_char) == 'k' ||
-                           tolower((unsigned char)digit_char) == 'm') {
-                    digits_suffix = digit_char;
-                } else if (!has_decimal && digit_char == '.') {
-                    filtered_digits[filtered_length++] = digit_char;
-                    has_decimal = 1;
-                }
-            }
-
-            int scale = 1;
-
-            if (digits_suffix == 'k') {
-                scale = 1000;
-            } else if (digits_suffix == 'm') {
-                scale = 1000000;
-            }
-
-            mud->input_digits_final =
-                (int)(atof(filtered_digits) * (float)scale);
-
-            memset(mud->input_digits_current, '\0', INPUT_DIGITS_LENGTH + 1);
-        }
-    } else if (code == K_BACKSPACE) {
-        size_t current_length = strlen(mud->input_text_current);
-
-        if (current_length > 0) {
-            mud->input_text_current[current_length - 1] = '\0';
-        }
-
-        size_t pm_length = strlen(mud->input_pm_current);
-
-        if (pm_length > 0 && should_append_pm) {
-            mud->input_pm_current[pm_length - 1] = '\0';
-        }
-
-        if (mud->options->offer_x) {
-            size_t digits_length = strlen(mud->input_digits_current);
-
-            if (digits_length > 0) {
-                mud->input_digits_current[digits_length - 1] = '\0';
-            }
-        }
     }
 }
 
@@ -5455,55 +5330,16 @@ void mudclient_play_sound(mudclient *mud, char *name) {
 int mudclient_walk_to(mudclient *mud, int start_x, int start_y, int x1, int y1,
                       int x2, int y2, int check_objects, int walk_to_action,
                       int first_step) {
-    int steps = world_route(mud->world, start_x, start_y, x1, y1, x2, y2,
-                            mud->walk_path_x, mud->walk_path_y, check_objects);
+    if (x2 >= 0 && y2 >= 0 && y2 <= 64 && y2 <= 64) {
+        mud->local_player->current_x = x2 * MAGIC_LOC + 64;
+        mud->local_player->current_y = y2 * MAGIC_LOC + 64;
 
-    if (first_step) {
-        if (steps == -1) {
-            if (walk_to_action) {
-                steps = 1;
-                mud->walk_path_x[0] = x1;
-                mud->walk_path_y[0] = y1;
-            } else {
-                return 0;
-            }
-        }
-    } else {
-        if (steps == -1) {
-            return 0;
-        }
+        mud->mouse_click_x_step = -24;
+        mud->mouse_click_x_x = mud->mouse_x;
+        mud->mouse_click_x_y = mud->mouse_y;
+        return 1;
     }
-
-    steps--;
-    start_x = mud->walk_path_x[steps];
-    start_y = mud->walk_path_y[steps];
-    steps--;
-
-    packet_stream_new_packet(mud->packet_stream,
-                             walk_to_action ? CLIENT_WALK_ACTION : CLIENT_WALK);
-
-    packet_stream_put_short(mud->packet_stream, start_x + mud->region_x);
-    packet_stream_put_short(mud->packet_stream, start_y + mud->region_y);
-
-    if (walk_to_action && steps == -1 && (start_x + mud->region_x) % 5 == 0) {
-        steps = 0;
-    }
-
-    for (int i = steps; i >= 0 && i > steps - 25; i--) {
-        packet_stream_put_byte(mud->packet_stream,
-                               mud->walk_path_x[i] - start_x);
-
-        packet_stream_put_byte(mud->packet_stream,
-                               mud->walk_path_y[i] - start_y);
-    }
-
-    packet_stream_send_packet(mud->packet_stream);
-
-    mud->mouse_click_x_step = -24;
-    mud->mouse_click_x_x = mud->mouse_x;
-    mud->mouse_click_x_y = mud->mouse_y;
-
-    return 1;
+    return 0;
 }
 
 void mudclient_walk_to_action_source(mudclient *mud, int start_x, int start_y,
