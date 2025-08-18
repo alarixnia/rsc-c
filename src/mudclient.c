@@ -4945,27 +4945,47 @@ void browser_key_pressed(int code, int char_code) {
 #endif
 
 void mudclient_go_up(mudclient *mud) {
+    int x = mud->region_x + ((mud->local_player->current_x - 64) / MAGIC_LOC);
+    int y = mud->region_y + ((mud->local_player->current_y - 64) / MAGIC_LOC);
     if (mud->plane_index < 3) {
         mud->plane_index++;
         mud->plane_height = 1776 - (mud->plane_index * mud->plane_multiplier);
         mud->region_y += mud->plane_multiplier;
+        y += mud->plane_multiplier;
     } else {
+        y -= (mud->plane_multiplier * mud->plane_index);
         mud->plane_index = 0;
         mud->plane_height = 1776 - (mud->plane_index * mud->plane_multiplier);
         mud->region_y -= (3 * mud->plane_multiplier);
     }
+    mudclient_load_next_region(mud, x, y);
+    mud->local_region_x = x - mud->region_x;
+    mud->local_region_y = y - mud->region_y;
+    mud->local_player->current_x = ((mud->local_region_x) * MAGIC_LOC) + 64;
+    mud->local_player->current_y = ((mud->local_region_y) * MAGIC_LOC) + 64;
+    world_add_entities(mud);
 }
 
 void mudclient_go_down(mudclient *mud) {
+    int x = mud->region_x + ((mud->local_player->current_x - 64) / MAGIC_LOC);
+    int y = mud->region_y + ((mud->local_player->current_y - 64) / MAGIC_LOC);
     if (mud->plane_index > 0) {
         mud->plane_index--;
         mud->plane_height = 1776 - (mud->plane_index * mud->plane_multiplier);
         mud->region_y -= mud->plane_multiplier;
+        y -= mud->plane_multiplier;
     } else {
         mud->plane_index = 3;
         mud->plane_height = 1776 - (mud->plane_index * mud->plane_multiplier);
         mud->region_y += (3 * mud->plane_multiplier);
+        y += (mud->plane_multiplier * mud->plane_index);
     }
+    mudclient_load_next_region(mud, x, y);
+    mud->local_region_x = x - mud->region_x;
+    mud->local_region_y = y - mud->region_y;
+    mud->local_player->current_x = ((mud->local_region_x) * MAGIC_LOC) + 64;
+    mud->local_player->current_y = ((mud->local_region_y) * MAGIC_LOC) + 64;
+    world_add_entities(mud);
 }
 
 void mudclient_teleport(mudclient *mud, int x, int y) {

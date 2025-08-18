@@ -193,21 +193,14 @@
 
 #define MOUSE_HISTORY_LENGTH 8192
 
-#define MUD_VANILLA_WIDTH 512
-#define MUD_VANILLA_HEIGHT 346
+#define MUD_VANILLA_WIDTH 640
+#define MUD_VANILLA_HEIGHT 480
 
-#define MUD_MIN_WIDTH 320
-#define MUD_MIN_HEIGHT 240
+#define MUD_WIDTH 640
+#define MUD_HEIGHT 480
 
-#ifdef _3DS
-#define MUD_WIDTH MUD_MIN_WIDTH
-#define MUD_HEIGHT MUD_MIN_HEIGHT
-#else
-#define MUD_WIDTH MUD_VANILLA_WIDTH
-#define MUD_HEIGHT MUD_VANILLA_HEIGHT
-// #define MUD_WIDTH 320
-// #define MUD_HEIGHT 240
-#endif
+#define MUD_MIN_WIDTH 640
+#define MUD_MIN_HEIGHT 480
 
 // TODO make this a function
 #define MUD_IS_COMPACT                                                         \
