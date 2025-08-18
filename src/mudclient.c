@@ -242,10 +242,12 @@ void world_add_entities(mudclient *mud) {
 
                 for (int i = 0; i < mud->object_count; i++) {
                     if (mud->objects[i].x != x||
-                        mud->objects[i].y != y) {
+                        mud->objects[i].y != (y - 1)) {
                         continue;
                     }
 
+                    mud->ground_items[mud->ground_item_count].y =
+                        mud->ground_items[mud->ground_item_count].y - 1;
                     mud->ground_items[mud->ground_item_count].z =
                         game_data.objects[mud->objects[i].id].elevation;
 
@@ -2234,8 +2236,6 @@ int mudclient_load_next_region(mudclient *mud, int lx, int ly) {
         mud->surface, "Loading... Please wait", mud->surface->width / 2,
         mud->surface->height / 2 + 19, FONT_BOLD_12, WHITE);
 
-    mudclient_draw_chat_message_tabs(mud);
-
 #ifdef RENDER_3DS_GL
     mudclient_3ds_gl_frame_start(mud, 0);
 #endif
@@ -3962,19 +3962,6 @@ void mudclient_draw_game(mudclient *mud) {
 #ifdef RENDER_3DS_GL
     mudclient_3ds_gl_frame_start(mud, 1);
 #endif
-
-    if (mud->death_screen_timeout != 0) {
-        surface_fade_to_black(mud->surface);
-
-        surface_draw_string_centre(
-            mud->surface, "Oh dear! You are dead...", mud->surface->width / 2,
-            (mud->surface->height - 12) / 2, FONT_BOLD_24, RED);
-
-        mudclient_draw_chat_message_tabs(mud);
-
-        surface_draw(mud->surface);
-        return;
-    }
 
     if (!mud->world->player_alive) {
         return;
