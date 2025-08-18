@@ -457,27 +457,6 @@ int packet_stream_read_packet(PacketStream *packet_stream, int8_t *buffer) {
 
 void packet_stream_new_packet(PacketStream *packet_stream,
                               ClientOpcode opcode) {
-#if 0
-    packet_stream->opcode_friend = get_client_opcode_friend(opcode);
-#endif
-
-    if (packet_stream->packet_start >
-        ((packet_stream->packet_max_length * 4) / 5)) {
-        if (packet_stream_write_packet(packet_stream, 0) < 0) {
-            packet_stream->socket_exception = 1;
-            packet_stream->socket_exception_message = "failed to write packet";
-        }
-    }
-
-#ifndef NO_ISAAC
-    if (packet_stream->isaac_ready) {
-        opcode = opcode + isaac_next(&packet_stream->isaac_out);
-    }
-#endif
-
-    packet_stream->packet_data[packet_stream->packet_start + 2] = opcode & 0xff;
-    packet_stream->packet_data[packet_stream->packet_start + 3] = 0;
-    packet_stream->packet_end = packet_stream->packet_start + 3;
 }
 
 /*int packet_stream_decode_opcode(PacketStream *packet_stream, int opcode) {
@@ -497,114 +476,31 @@ void packet_stream_new_packet(PacketStream *packet_stream,
 }*/
 
 int packet_stream_write_packet(PacketStream *packet_stream, int i) {
-    if (packet_stream->socket_exception) {
-        packet_stream->packet_start = 0;
-        packet_stream->packet_end = 3;
-        packet_stream->socket_exception = 0;
-
-        mud_error("socket exception: %s\n",
-                  packet_stream->socket_exception_message);
-
-        return -1;
-    }
-
-    packet_stream->delay++;
-
-    if (packet_stream->delay < i) {
-        return 0;
-    }
-
-    if (packet_stream->packet_start > 0) {
-        packet_stream->delay = 0;
-
-        if (packet_stream_write_bytes(packet_stream, packet_stream->packet_data,
-                                      0, packet_stream->packet_start) < 0) {
-            return -1;
-        }
-    }
-
-    packet_stream->packet_start = 0;
-    packet_stream->packet_end = 3;
-
-    return 0;
 }
 
 void packet_stream_send_packet(PacketStream *packet_stream) {
-#if 0
-    int i = packet_stream->packet_data[packet_stream->packet_start + 2] & 0xff;
-
-    packet_stream->packet_data[packet_stream->packet_start + 2] =
-        (int8_t)(i + packet_stream->decode_key);
-
-    int opcode_friend = packet_stream->opcode_friend;
-
-    packet_stream->encode_threat_index =
-        (packet_stream->encode_threat_index + opcode_friend) % THREAT_LENGTH;
-
-    char threat_character = SPOOKY_THREAT[packet_stream->encode_threat_index];
-
-    packet_stream->encode_key =
-        packet_stream->encode_key * 3 + (int)threat_character + opcode_friend &
-        0xffff;
-#endif
-
-    int length = packet_stream->packet_end - packet_stream->packet_start - 2;
-
-    if (length >= 160) {
-        packet_stream->packet_data[packet_stream->packet_start] =
-            (160 + (length / 256)) & 0xff;
-
-        packet_stream->packet_data[packet_stream->packet_start + 1] =
-            length & 0xff;
-    } else {
-        packet_stream->packet_data[packet_stream->packet_start] = length & 0xff;
-        packet_stream->packet_end--;
-
-        packet_stream->packet_data[packet_stream->packet_start + 1] =
-            packet_stream->packet_data[packet_stream->packet_end];
-    }
-
-    packet_stream->packet_start = packet_stream->packet_end;
 }
 
 int packet_stream_flush_packet(PacketStream *packet_stream) {
-    packet_stream_send_packet(packet_stream);
-    return packet_stream_write_packet(packet_stream, 0);
 }
 
 void packet_stream_put_bytes(PacketStream *packet_stream, void *src, int offset,
                              int length) {
-    uint8_t *p = src;
-
-    memcpy(packet_stream->packet_data + packet_stream->packet_end, p + offset,
-           length);
-
-    packet_stream->packet_end += length;
 }
 
 void packet_stream_put_byte(PacketStream *packet_stream, int i) {
-    packet_stream->packet_data[packet_stream->packet_end++] = i & 0xff;
 }
 
 void packet_stream_put_short(PacketStream *packet_stream, int i) {
-    packet_stream->packet_data[packet_stream->packet_end++] = (i >> 8) & 0xff;
-    packet_stream->packet_data[packet_stream->packet_end++] = i & 0xff;
 }
 
 void packet_stream_put_int(PacketStream *packet_stream, int i) {
-    packet_stream->packet_data[packet_stream->packet_end++] = (i >> 24) & 0xff;
-    packet_stream->packet_data[packet_stream->packet_end++] = (i >> 16) & 0xff;
-    packet_stream->packet_data[packet_stream->packet_end++] = (i >> 8) & 0xff;
-    packet_stream->packet_data[packet_stream->packet_end++] = i & 0xff;
 }
 
 void packet_stream_put_long(PacketStream *packet_stream, int64_t i) {
-    packet_stream_put_int(packet_stream, (int32_t)(i >> 32));
-    packet_stream_put_int(packet_stream, (int32_t)i);
 }
 
 void packet_stream_put_string(PacketStream *packet_stream, char *s) {
-    packet_stream_put_bytes(packet_stream, (int8_t *)s, 0, strlen(s));
 }
 
 #ifndef NO_RSA
