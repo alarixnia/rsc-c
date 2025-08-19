@@ -1302,10 +1302,12 @@ static void mudclient_load_media_tga(mudclient *mud, void *media_jag) {
     surface_parse_sprite_tga(mud->surface, mud->sprite_media + 24,
                              data, len, 1, 1);
 
-    data = load_data("buttons.tga", 0, media_jag, &len);
-    assert(data != NULL);
-    surface_parse_sprite_tga(mud->surface, mud->sprite_media + 25,
-                             data, len, 1, 2);
+    if (mud->options->version_media > 23) {
+        data = load_data("buttons.tga", 0, media_jag, &len);
+        assert(data != NULL);
+        surface_parse_sprite_tga(mud->surface, mud->sprite_media + 25,
+                                 data, len, 1, 2);
+    }
 
     data = load_data("scrollbar.tga", 0, media_jag, &len);
     assert(data != NULL);
