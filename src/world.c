@@ -515,7 +515,7 @@ static void world_load_section_files(World *world, int x, int y, int plane,
         for (int tile = 0; tile < TILE_COUNT;) {
             int val = get_unsigned_byte(map_data, offset++, len);
 
-            if (world->version > 53) {
+            if (world->version > 54) {
                 world->walls_north_south[chunk][tile++] = val;
             } else if (world->version > 45) {
                 if (val < 192) {
@@ -539,7 +539,7 @@ static void world_load_section_files(World *world, int x, int y, int plane,
         for (int tile = 0; tile < TILE_COUNT;) {
             int val = get_unsigned_byte(map_data, offset++, len);
 
-            if (world->version > 53) {
+            if (world->version > 54) {
                 world->walls_east_west[chunk][tile++] = val;
             } else if (world->version > 45) {
                 if (val < 192) {
@@ -563,7 +563,7 @@ static void world_load_section_files(World *world, int x, int y, int plane,
         for (int tile = 0; tile < TILE_COUNT;) {
             int val = get_unsigned_byte(map_data, offset++, len);
 
-            if (world->version > 53) {
+            if (world->version > 54) {
                 world->walls_diagonal[chunk][tile++] = val;
             } else if (world->version > 45) {
                 if (val < 192) {
@@ -587,7 +587,7 @@ static void world_load_section_files(World *world, int x, int y, int plane,
         for (int tile = 0; tile < TILE_COUNT;) {
             int val = get_unsigned_byte(map_data, offset++, len);
 
-            if (world->version > 53) {
+            if (world->version > 54) {
                 if (val > 0) {
                     world->walls_diagonal[chunk][tile] = val + 12000;
                 }
