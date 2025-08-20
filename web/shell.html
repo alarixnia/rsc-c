@@ -317,39 +317,14 @@
 
                     canvas.addEventListener('mousedown', focusCanvas);
 
-                    const requestFullscreen =
-                        Element.prototype.requestFullscreen ||
-                        Element.prototype.webkitRequestFullscreen;
-
-                    const shouldPreventTouch = () => {
-                        return (
-                            requestFullscreen &&
-                            !(
-                                document.fullscreenElement ||
-                                document.webkitFullscreenElement
-                            )
-                        );
-                    };
-
                     canvas.addEventListener('touchstart', (event) => {
-                        if (shouldPreventTouch()) {
-                            event.stopImmediatePropagation();
-                        }
-
                         focusCanvas();
                     });
 
                     canvas.addEventListener('touchend', (event) => {
-                        if (shouldPreventTouch()) {
-                            event.stopImmediatePropagation();
-                            requestFullscreen.bind(document.documentElement)();
-                        }
                     });
 
                     canvas.addEventListener('touchmove', (event) => {
-                        if (shouldPreventTouch()) {
-                            event.stopImmediatePropagation();
-                        }
                     });
 
                     return canvas;
