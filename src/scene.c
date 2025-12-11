@@ -1,5 +1,13 @@
 #include "scene.h"
 
+#if defined(__GNUC__)
+#define likely(x)	(__builtin_expect(((x) != 0), 1))
+#define unlikely(x)	(__builtin_expect(((x) != 0), 0))
+#else
+#define likely(x)	(x)
+#define unlikely(x)	(x)
+#endif
+
 static void scene_prepare_texture(Scene *scene, int id);
 static void scene_set_texture_pixels(Scene *scene, int id);
 static void scene_initialise_polygon_2d(Scene *scene, int polygon_index);
@@ -101,11 +109,7 @@ int scene_polygon_depth_compare(const void *a, const void *b) {
         return -1;
     }
 
-    if (polygon_a->depth == polygon_b->depth) {
-        return 0;
-    }
-
-    return polygon_a->depth < polygon_b->depth ? 1 : -1;
+    return polygon_b->depth - polygon_a->depth;
 }
 
 void scene_new(Scene *scene, Surface *surface, int model_count,
@@ -214,7 +218,7 @@ void scene_new(Scene *scene, Surface *surface, int model_count,
 
         /* thanks jorsa */
         scene->texture_light_gradient[gradient_index] =
-            ((19 * pow(2, x)) + (4 * pow(2, x) * y)) / 255.0f;
+            ((19 * powf(2, x)) + (4 * powf(2, x) * y)) / 255.0f;
 
         /*scene->texture_light_gradient[gradient_index] =
             0.074708f * powf(15.844317f, ((float)i / 255.0f));*/
@@ -292,7 +296,8 @@ static void scene_texture128_scanline(int32_t *restrict raster,
                                       int length, int k2, int l2) {
     // 2 ** 7 = 128
     static const int texture_shift = 7;
-    const int texture_size = (int)pow(2, texture_shift);
+
+    const int texture_size = (int)powf(2, texture_shift);
     const int texture_area = (texture_size * texture_size) - texture_size;
 
     if (length <= 0) {
@@ -392,7 +397,7 @@ static void scene_texture128_alphakey_scanline(int32_t *restrict raster,
                                                int i3) {
     // 2 ** 7 = 128
     static const int texture_shift = 7;
-    const int texture_size = (int)pow(2, texture_shift);
+    const int texture_size = (int)powf(2, texture_shift);
     const int texture_area = (texture_size * texture_size) - texture_size;
 
     if (length <= 0) {
@@ -495,7 +500,7 @@ static void scene_texture64_scanline(int32_t *restrict raster,
                                      int k2, int l2) {
     // 2 ** 6 = 64
     static const int texture_shift = 6;
-    int texture_size = (int)pow(2, texture_shift);
+    int texture_size = (int)powf(2, texture_shift);
     const int texture_area = (texture_size * texture_size) - texture_size;
 
     if (length <= 0) {
@@ -590,7 +595,7 @@ static void scene_texture64_alphakey_scanline(int32_t *restrict raster,
                                               int i3) {
     // 2 ** 6 = 64
     static const int texture_shift = 6;
-    const int texture_size = (int)pow(2, texture_shift);
+    const int texture_size = (int)powf(2, texture_shift);
     const int texture_area = (texture_size * texture_size) - texture_size;
 
     if (length <= 0) {
@@ -779,9 +784,8 @@ void scene_remove_model(Scene *scene, GameModel *model) {
             scene->models[i] = NULL;
             scene->model_count--;
 
-            for (int j = i; j < scene->model_count; j++) {
-                scene->models[j] = scene->models[j + 1];
-            }
+            memmove(scene->models + i, scene->models + i + 1,
+                sizeof(*scene->models) * scene->model_count);
         }
     }
 }
@@ -954,7 +958,7 @@ static void scene_polygons_intersect_sort(Scene *scene, int step,
             l++;
         }
 
-        if (l == count) {
+        if (unlikely(l == count)) {
             return;
         }
 
@@ -1424,7 +1428,7 @@ void scene_render(Scene *scene) {
 
     scene_initialise_polygons_2d(scene);
 
-    if (scene->visible_polygons_count == 0) {
+    if (unlikely(scene->visible_polygons_count == 0)) {
         return;
     }
 
@@ -2274,7 +2278,7 @@ static void scene_rasterize(Scene *scene, int vertex_count, int32_t *vertices_x,
 
     /* face_fill's > 0 are textures, < 0 map to RGB */
     if (face_fill >= 0) {
-        if (face_fill >= scene->texture_count) {
+        if (unlikely(face_fill >= scene->texture_count)) {
             face_fill = 0;
         }
 
@@ -2586,7 +2590,7 @@ static void scene_rasterize(Scene *scene, int vertex_count, int32_t *vertices_x,
             break;
         }
 
-        if (i == RAMP_COUNT - 1) {
+        if (unlikely(i == RAMP_COUNT - 1)) {
             int gradient_index = ((float)rand() / (float)RAND_MAX) * RAMP_COUNT;
 
             scene->gradient_base[gradient_index] = face_fill;
@@ -2624,7 +2628,7 @@ static void scene_rasterize(Scene *scene, int vertex_count, int32_t *vertices_x,
         scanline_inc = 2;
     }
 
-    if (game_model->transparent) {
+    if (unlikely(game_model->transparent)) {
         for (int i = scene->min_y; i < scene->max_y; i += scanline_inc) {
             Scanline *scanline = &scene->scanlines[i];
             int j = scanline->start_x >> 8;
@@ -2777,7 +2781,7 @@ static void scene_initialise_polygon_3d(Scene *scene, int polygon_index) {
     int normal_z = project_x_delta_ba * project_y_delta_ca -
                    project_x_delta_ca * project_y_delta_ba;
 
-    if (normal_scale == -1) {
+    if (likely(normal_scale == -1)) {
         normal_scale = 0;
 
         for (; normal_x > 25000 || normal_y > 25000 || normal_z > 25000 ||
@@ -2905,8 +2909,8 @@ static int scene_separate_polygon(GamePolygon *polygon_a,
             (first_project_z - game_model_a->project_vertex_z[vertex_index]) *
                 normal_z;
 
-        if ((magnitude >= -normal_magnitude || visibility >= 0) &&
-            (magnitude <= normal_magnitude || visibility <= 0)) {
+        if (likely((magnitude >= -normal_magnitude || visibility >= 0) &&
+            (magnitude <= normal_magnitude || visibility <= 0))) {
             continue;
         }
 
@@ -2939,8 +2943,8 @@ static int scene_separate_polygon(GamePolygon *polygon_a,
             (first_project_z - game_model_b->project_vertex_z[vertex_index]) *
                 normal_z;
 
-        if ((magnitude >= -normal_magnitude || visibility <= 0) &&
-            (magnitude <= normal_magnitude || visibility >= 0)) {
+        if (likely((magnitude >= -normal_magnitude || visibility <= 0) &&
+            (magnitude <= normal_magnitude || visibility >= 0))) {
             continue;
         }
 
@@ -2956,7 +2960,7 @@ static int scene_separate_polygon(GamePolygon *polygon_a,
     int *vertex_view_y_a = NULL;
     int length_a = 0;
 
-    if (face_vertex_count_a == 2) {
+    if (unlikely(face_vertex_count_a == 2)) {
         length_a = 4;
 
         vertex_view_x_a = alloca(length_a * sizeof(int));
@@ -2999,7 +3003,7 @@ static int scene_separate_polygon(GamePolygon *polygon_a,
     int *vertex_view_y_b = NULL;
     int length_b = 0;
 
-    if (face_vertex_count_b == 2) {
+    if (unlikely(face_vertex_count_b == 2)) {
         length_b = 4;
 
         vertex_view_x_b = alloca(length_b * sizeof(int));
@@ -3384,7 +3388,7 @@ void scene_set_light(Scene *scene, int ambience, int diffuse, int x, int y,
 
 #ifdef RENDER_SW
 static int scene_method306(int i, int j, int k, int l, int i1) {
-    if (l == j) {
+    if (unlikely(l == j)) {
         return i;
     }
 
@@ -3468,11 +3472,11 @@ static int scene_intersect(int *vertex_view_x_a, int *vertex_view_y_a,
         }
     }
 
-    if (view_y_b >= k20) {
+    if (unlikely(view_y_b >= k20)) {
         return 0;
     }
 
-    if (view_y_a >= l20) {
+    if (unlikely(view_y_a >= l20)) {
         return 0;
     }
 
